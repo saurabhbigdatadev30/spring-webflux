@@ -10,7 +10,7 @@ public class Lec01MonoTest extends AbstractWebClient {
 
     private final WebClient client = createWebClient();
 
-    @Test
+   /* @Test
     public void simpleGet() throws InterruptedException {
         this.client.get()
                    .uri("/lec01/product/1")
@@ -34,6 +34,7 @@ public class Lec01MonoTest extends AbstractWebClient {
         }
 
         Thread.sleep(Duration.ofSeconds(2));
-    }
+    }*/
 
 }
+

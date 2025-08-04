@@ -26,6 +26,18 @@ public class Lec03CustomerOrderRepositoryTest extends AbstractTest {
     }
 
     @Test
+    public void joinCustomerWithCustomerOrder() {
+        this.repository.getOrderDetailsJoin("sam")
+                .doOnNext(p -> log.info("{}", p))
+                .as(StepVerifier::create)
+                .expectNextCount(2)
+                .expectComplete()
+                .verify();
+    }
+
+
+
+    @Test
     public void orderDetailsByProduct() {
         this.repository.getOrderDetailsByProduct("iphone 20")
                        .doOnNext(dto -> log.info("{}", dto))

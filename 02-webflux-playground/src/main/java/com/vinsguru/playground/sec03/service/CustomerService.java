@@ -26,7 +26,8 @@ public class CustomerService {
     }
 
     public Mono<CustomerDto> getCustomerById(Integer id) {
-        return this.customerRepository.findById(id)
+        return this.customerRepository.findById(id) // Returns the Mono<Customer>
+                                      // Mono<Customer> Transform to Mono<CustomerDto>
                                       .map(EntityDtoMapper::toDto);
     }
 

@@ -18,6 +18,8 @@ public class ReactiveWebController {
                                                  .baseUrl("http://localhost:7070")
                                                  .build();
 
+
+
     @GetMapping("products")
     public Flux<Product> getProducts() {
         return this.webClient.get()
@@ -29,11 +31,16 @@ public class ReactiveWebController {
 
     @GetMapping(value = "products/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<Product> getProductsStream() {
+        /*
+          As and when we get an item, it will return to doOnNext()
+          When a client closes browser it internally invokes the subscription.cancel() method
+         */
         return this.webClient.get()
                              .uri("/demo01/products")
                              .retrieve()
                              .bodyToFlux(Product.class)
-                             .doOnNext(p -> log.info("received: {}", p));
+                             .doOnNext(p -> log.info("received: {}", p))
+                             .onErrorComplete();
     }
 
 }

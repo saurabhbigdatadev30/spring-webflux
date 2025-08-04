@@ -1,12 +1,14 @@
 package com.vinsguru.playground.sec02.entity;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 
 public class Product {
 
     @Id
     private Integer id;
-    private String description;
+    @Column("description")
+    private String description1;
     private Integer price;
 
     public Integer getId() {
@@ -18,11 +20,11 @@ public class Product {
     }
 
     public String getDescription() {
-        return description;
+        return description1;
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description1 = description1;
     }
 
     public Integer getPrice() {
@@ -37,7 +39,7 @@ public class Product {
     public String toString() {
         return "Product{" +
                 "id=" + id +
-                ", description='" + description + '\'' +
+                ", description='" + description1 + '\'' +
                 ", price=" + price +
                 '}';
     }

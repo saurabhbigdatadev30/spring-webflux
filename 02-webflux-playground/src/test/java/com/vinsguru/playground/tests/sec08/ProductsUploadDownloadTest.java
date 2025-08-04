@@ -1,3 +1,4 @@
+/*
 package com.vinsguru.playground.tests.sec08;
 
 import com.vinsguru.playground.sec08.dto.ProductDto;
@@ -9,9 +10,11 @@ import reactor.test.StepVerifier;
 
 import java.nio.file.Path;
 
+*/
 /*
     Just for demo
- */
+ *//*
+
 public class ProductsUploadDownloadTest {
 
     private static final Logger log = LoggerFactory.getLogger(ProductsUploadDownloadTest.class);
@@ -41,3 +44,4 @@ public class ProductsUploadDownloadTest {
     }
 
 }
+*/

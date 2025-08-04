@@ -36,9 +36,12 @@ public class CustomerController {
                                    .switchIfEmpty(ApplicationExceptions.customerNotFound(id));
     }
 
+    /*
+     @RequestBody Mono<CustomerDto> mono is the Publisher , which needs to be validated before persisting to the DataBase
+     */
     @PostMapping
-    public Mono<CustomerDto> saveCustomer(@RequestBody Mono<CustomerDto> mono) {
-        return mono.transform(RequestValidator.validate())
+    public Mono<CustomerDto> saveCustomer(@RequestBody Mono<CustomerDto> customermono) {
+        return customermono.transform(RequestValidator.validate())
                    .as(this.customerService::saveCustomer);
     }
 
@@ -48,6 +51,8 @@ public class CustomerController {
                    .as(validReq -> this.customerService.updateCustomer(id, validReq))
                    .switchIfEmpty(ApplicationExceptions.customerNotFound(id));
     }
+
+
 
     @DeleteMapping("{id}")
     public Mono<Void> deleteCustomer(@PathVariable Integer id) {

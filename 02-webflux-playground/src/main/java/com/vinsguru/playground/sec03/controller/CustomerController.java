@@ -1,5 +1,6 @@
 package com.vinsguru.playground.sec03.controller;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vinsguru.playground.sec03.dto.CustomerDto;
 import com.vinsguru.playground.sec03.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +33,12 @@ public class CustomerController {
     @GetMapping("{id}")
     public Mono<ResponseEntity<CustomerDto>> getCustomer(@PathVariable Integer id) {
         return this.customerService.getCustomerById(id)
+                              //   .map(dto -> ResponseEntity.ok(dto))
                                    .map(ResponseEntity::ok)
                                    .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+
 
     @PostMapping
     public Mono<CustomerDto> saveCustomer(@RequestBody Mono<CustomerDto> mono) {
@@ -44,6 +48,7 @@ public class CustomerController {
     @PutMapping("{id}")
     public Mono<ResponseEntity<CustomerDto>> updateCustomer(@PathVariable Integer id, @RequestBody Mono<CustomerDto> mono) {
         return this.customerService.updateCustomer(id, mono)
+                              //   .map(dto -> ResponseEntity.ok(dto))
                                    .map(ResponseEntity::ok)
                                    .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -51,9 +56,42 @@ public class CustomerController {
     @DeleteMapping("{id}")
     public Mono<ResponseEntity<Void>> deleteCustomer(@PathVariable Integer id) {
         return this.customerService.deleteCustomerById(id)
+                               // Using filter we check that the this.customerService.deleteCustomerById(id) is true
                                    .filter(b -> b)
                                    .map(b -> ResponseEntity.ok().<Void>build())
                                    .defaultIfEmpty(ResponseEntity.notFound().build());
+
+
+       /*
+
+               (a)  If the customer is found , the this.customerService.deleteCustomerById(id) deletes &   returns empty
+
+               (b)  If the customer is not found, then also the this.customerService.deleteCustomerById(id) returns empty
+
+
+
+                To address this issue we use @Query = Modifying
+                        Mono<Integer> deleteByLastName  - Number of  rows were affected
+                        Mono<Void> deleteByLastName -
+                        Mono<Boolean> deleteByLastName  - If the rows were affected
+
+
+                         @Modifying // for demo
+                         @Query("delete from customer where id=:id")
+                         Mono<Boolean> deleteCustomerById(Integer id);
+
+                So now in the @Controller
+
+                   public Mono<ResponseEntity<Void>> deleteCustomer(@PathVariable Integer id) {
+
+                         return this.customerService.deleteCustomerById(id) returns boolean
+
+                         Using filter(b ->b), this checks that this.customerService.deleteCustomerById(id) returns true or false
+                                   (a) If it returns true , then   .map(b -> ResponseEntity.ok().<Void>build())
+                                   (b) If it returns false , then  .defaultIfEmpty(ResponseEntity.notFound().build());
+
+
+         */
     }
 
 }

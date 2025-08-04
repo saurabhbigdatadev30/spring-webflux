@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono;
 
 public class ProductClient {
 
-    private final WebClient client = WebClient.builder()
+    /*private final WebClient client = WebClient.builder()
                                               .baseUrl("http://localhost:8080")
                                               .build();
 
@@ -28,6 +28,6 @@ public class ProductClient {
                           .accept(MediaType.APPLICATION_NDJSON)
                           .retrieve()
                           .bodyToFlux(ProductDto.class);
-    }
+    }*/
 
 }

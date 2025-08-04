@@ -17,10 +17,17 @@ import java.util.List;
 public class TraditionalWebController {
 
     private static final Logger log = LoggerFactory.getLogger(TraditionalWebController.class);
+   /*
+
     private final RestClient restClient = RestClient.builder()
                                                     .requestFactory(new JdkClientHttpRequestFactory())
                                                     .baseUrl("http://localhost:7070")
-                                                    .build();
+                                                    .build();*/
+    private final RestClient restClient;
+
+    public TraditionalWebController(RestClient restClient) {
+        this.restClient = restClient;
+    }
 
     @GetMapping("products")
     public List<Product> getProducts() {
@@ -35,13 +42,13 @@ public class TraditionalWebController {
 
     @GetMapping("products2")
     public Flux<Product> getProducts2() {
-        var list = this.restClient.get()
+        var listProducts = this.restClient.get()
                                   .uri("/demo01/products")
                                   .retrieve()
                                   .body(new ParameterizedTypeReference<List<Product>>() {
                                   });
-        log.info("received response: {}", list);
-        return Flux.fromIterable(list);
+        log.info("received response: {}", listProducts);
+        return Flux.fromIterable(listProducts);
     }
 
 }

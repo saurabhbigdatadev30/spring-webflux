@@ -62,7 +62,7 @@ public class CustomerServiceTest {
     @Test
     public void createAndDeleteCustomer() {
         // create
-        var dto = new CustomerDto(null, "marshal", "marshal@gmail.com");
+        var dto = new CustomerDto(null, "marshal", "marshal@kion.com");
         this.client.post()
                    .uri("/customers")
                    .bodyValue(dto)
@@ -72,7 +72,7 @@ public class CustomerServiceTest {
                    .consumeWith(r -> log.info("{}", new String(Objects.requireNonNull(r.getResponseBody()))))
                    .jsonPath("$.id").isEqualTo(11)
                    .jsonPath("$.name").isEqualTo("marshal")
-                   .jsonPath("$.email").isEqualTo("marshal@gmail.com");
+                   .jsonPath("$.email").isEqualTo("marshal@kion.com");
 
         // delete
         this.client.delete()
@@ -84,7 +84,7 @@ public class CustomerServiceTest {
 
     @Test
     public void updateCustomer() {
-        var dto = new CustomerDto(null, "noel", "noel@gmail.com");
+        var dto = new CustomerDto(null, "noel", "noel@kion.com");
         this.client.put()
                    .uri("/customers/10")
                    .bodyValue(dto)
@@ -94,7 +94,7 @@ public class CustomerServiceTest {
                    .consumeWith(r -> log.info("{}", new String(Objects.requireNonNull(r.getResponseBody()))))
                    .jsonPath("$.id").isEqualTo(10)
                    .jsonPath("$.name").isEqualTo("noel")
-                   .jsonPath("$.email").isEqualTo("noel@gmail.com");
+                   .jsonPath("$.email").isEqualTo("noel@kion.com");
     }
 
     @Test
@@ -116,7 +116,7 @@ public class CustomerServiceTest {
                    .jsonPath("$.detail").isEqualTo("Customer [id=11] is not found");
 
         // put
-        var dto = new CustomerDto(null, "noel", "noel@gmail.com");
+        var dto = new CustomerDto(null, "noel", "noel@kion.com");
         this.client.put()
                    .uri("/customers/11")
                    .bodyValue(dto)
@@ -129,7 +129,7 @@ public class CustomerServiceTest {
     @Test
     public void invalidInput(){
         // missing name
-        var missingName = new CustomerDto(null, null, "noel@gmail.com");
+        var missingName = new CustomerDto(null, null, "noel@kion.com");
         this.client.post()
                    .uri("/customers")
                    .bodyValue(missingName)

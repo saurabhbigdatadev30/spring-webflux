@@ -28,6 +28,16 @@ public class Lec02ProductRepositoryTest extends AbstractTest {
     }
 
     @Test
+    public void findByPriceRangeThroughQuery() {
+        this.repository.findByPriceBetweenQuery(750, 1000)
+                .doOnNext(p -> log.info("{}", p))
+                .as(StepVerifier::create)
+                .expectNextCount(3)
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
     public void pageable() {
         this.repository.findBy(PageRequest.of(0, 3).withSort(Sort.by("price").ascending()))
                        .doOnNext(p -> log.info("{}", p))
@@ -38,5 +48,32 @@ public class Lec02ProductRepositoryTest extends AbstractTest {
                        .expectComplete()
                        .verify();
     }
+
+    @Test
+    public void pageableTest() {
+        this.repository.findBy(PageRequest.of(1, 3).withSort(Sort.by("price").ascending()))
+                .doOnNext(p -> log.info("{}", p))
+                .subscribe()
+                ;
+    }
+
+    /*
+
+    Page = 0
+        Executing SQL statement [SELECT PRODUCT.ID, PRODUCT.DESCRIPTION, PRODUCT.PRICE FROM PRODUCT ORDER BY PRODUCT.PRICE ASC
+          LIMIT 3]
+           Product{id=9, description='apple tv', price=200}
+           Product{id=7, description='airpods pro', price=250}
+           Product{id=10, description='homepod', price=300}
+
+      Page[1]
+         main] o.s.r.c.DefaultDatabaseClient  : Executing SQL statement [SELECT PRODUCT.ID, PRODUCT.DESCRIPTION, PRODUCT.PRICE FROM PRODUCT ORDER BY PRODUCT.PRICE ASC OFFSET 3 ROWS FETCH FIRST 3 ROWS ONLY]
+  main] t.s.Lec02ProductRepositoryTest : Product{id=5, description='apple watch', price=400}
+  main] t.s.Lec02ProductRepositoryTest : Product{id=2, description='iphone 18', price=750}
+  main] t.s.Lec02ProductRepositoryTest : Product{id=3, description='ipad', price=800}
+
+
+
+     */
 
 }

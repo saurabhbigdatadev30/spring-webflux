@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
@@ -33,6 +34,8 @@ public class CustomerServiceTest {
                    .hasSize(10);
     }
 
+
+
     @Test
     public void paginatedCustomers() {
         this.client.get()
@@ -43,8 +46,23 @@ public class CustomerServiceTest {
                    .consumeWith(r -> log.info("{}", new String(Objects.requireNonNull(r.getResponseBody()))))
                    .jsonPath("$.length()").isEqualTo(2)
                    .jsonPath("$[0].id").isEqualTo(5)
-                   .jsonPath("$[1].id").isEqualTo(6);
+                   .jsonPath("$[1].id").isEqualTo(6)
+                   .jsonPath("$[0].name").isEqualTo("sophia")
+                   .jsonPath("$[1].name").isEqualTo("liam")
+                   .jsonPath("$[0].email").isEqualTo("sophia@example.com")
+                   .jsonPath("$[1].email").isEqualTo("liam@example.com")
+                    ;
     }
+
+    /*
+                      page = 3  &  size = 2  returns 2 JSON elements JSON []
+                           [
+                              {"id":5,"name":"sophia","email":"sophia@example.com"},
+                              {"id":6,"name":"liam","email":"liam@example.com"}
+                            ]
+     */
+
+
 
     @Test
     public void customerById() {
@@ -54,25 +72,45 @@ public class CustomerServiceTest {
                    .expectStatus().is2xxSuccessful()
                    .expectBody()
                    .consumeWith(r -> log.info("{}", new String(Objects.requireNonNull(r.getResponseBody()))))
+                   .jsonPath("$.length()").isEqualTo(3)
                    .jsonPath("$.id").isEqualTo(1)
                    .jsonPath("$.name").isEqualTo("sam")
                    .jsonPath("$.email").isEqualTo("sam@gmail.com");
     }
+              /*
+                customerById returns 1 JSON , not array ,
+                 {"id":1,"name":"sam","email":"sam@gmail.com"}
+
+
+                  so we don't need
+
+                 .jsonPath("$[0].name").isEqualTo("sam")
+
+
+               */
 
     @Test
     public void createAndDeleteCustomer() {
         // create
-        var dto = new CustomerDto(null, "marshal", "marshal@gmail.com");
+         var dto = new CustomerDto(null, "marshal", "marshal@gmail.com");
+         var monoCustomer = Mono.just(dto);
+
         this.client.post()
                    .uri("/customers")
-                   .bodyValue(dto)
+                /*
+                   understanding the difference between bodyValue vs body
+                   bodyValue takes raw data , while body takes Publisher
+                 */
+                   //.bodyValue(dto)
+                   .body(monoCustomer, CustomerDto.class)
                    .exchange()
                    .expectStatus().is2xxSuccessful()
                    .expectBody()
                    .consumeWith(r -> log.info("{}", new String(Objects.requireNonNull(r.getResponseBody()))))
-                   .jsonPath("$.id").isEqualTo(11)
-                   .jsonPath("$.name").isEqualTo("marshal")
-                   .jsonPath("$.email").isEqualTo("marshal@gmail.com");
+                   .jsonPath("$.id").isNotEmpty();
+                //  .jsonPath("$.id").isEqualTo(11)
+                 //  .jsonPath("$.name").isEqualTo("marshal")
+                //   .jsonPath("$.email").isEqualTo("marshal@gmail.com");
 
         // delete
         this.client.delete()

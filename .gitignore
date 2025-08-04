@@ -46,3 +46,12 @@
 **/mvnw
 **/mvnw.cmd
 **/node_modules/
+
+02-webflux-playground/products.txt
+external-services/BOOT-INF/classes/certs/
+external-services/BOOT-INF/classes/static/
+external-services/BOOT-INF/classpath.idx
+external-services/BOOT-INF/layers.idx
+external-services/META-INF/MANIFEST.MF
+external-services/META-INF/maven/com.vinsguru/external-services/pom.properties
+external-services/META-INF/services/
