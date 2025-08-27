@@ -9,9 +9,16 @@ import reactor.core.publisher.Flux;
 @Repository
 public interface CustomerRepository extends ReactiveCrudRepository<Customer, Integer> {
 
-    Flux<Customer> findByName(String name);
+     Flux<Customer> findByName(String name);
+
+    @Query(value = "SELECT * FROM customer WHERE name = :name")
+    Flux<Customer> findByNameQuery(String name);
 
     Flux<Customer> findByEmailEndingWith(String email);
+
+    // Using the native SQL Query for fetching all customers
+    @Query(value = "SELECT * FROM customer")
+    Flux<Customer> fectchAllCustomers();
 
     // Using the native SQL Query
     @Query(value = "SELECT customer.ID, customer.NAME, customer.EMAIL FROM customer WHERE customer.EMAIL LIKE CONCAT('%', ?1)")

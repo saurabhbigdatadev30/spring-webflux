@@ -45,7 +45,17 @@ public interface CustomerOrderRepository extends ReactiveCrudRepository<Customer
 
 
 
-    // Record class field name= customerIdTest1Test2 mapped with DB column name = customer_id_Test1_Test2
+    /*
+      The query parameters will be automatically mapped to [CustomerOrderRecord] class fields
+
+       Record class [CustomerOrderRecord] is used to hold the result of the query , having the following fields
+             orderID                ->    co.order_id,
+             productID              ->    co.product_id,
+             customerIdTest1Test2    ->   customer_id_Test1_Test2
+             customerNameTest1Test2  ->   customer_name_Test1_Test2
+
+     */
+
     @Query("""
            SELECT
             c.id as customer_id_Test1_Test2,

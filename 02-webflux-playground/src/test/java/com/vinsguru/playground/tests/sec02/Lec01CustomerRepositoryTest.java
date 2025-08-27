@@ -19,33 +19,11 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
     private CustomerRepository repository;
 
 
-    /*
-    Understanding to test the Publisher
 
-      To test the Publisher, we use StepVerifier
-
-            [A] var Flux<Customer>  customers =  ................
-
-            [B] StepVerifier::create(customers) , we use the as operator on the Publisher, to create the StepVerifier
-
-            Next() // THis is to check on the Publisher's item
-                   (a) expectNext(...)
-                   (b) expectNextCount(...)
-                   (c) assertNext(...)
-
-      // What are we expecting , error or complete
-          Complete/Error()
-                 (a) expectComplete()  -> This is to check if the Publisher completes
-                 (b) expectError()  -> This is to check if the Publisher errors out
-
-     //  Verify (This is what subscribes and runs the test)
-             verify()
-
-     */
     @Test
     public void findAll() {
-        // Get Flux<Customer>
-        this.repository.findAll()
+        // Get Flux<Customer> from the repository using the native query
+        this.repository.fectchAllCustomers()
                        .doOnNext(c -> log.info("Get the Customer from Publisher ===>>> {}", c))
                        .as(StepVerifier::create)
                        .expectNextCount(10)
@@ -64,8 +42,8 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
     }
 
     @Test
-    public void findByName() {
-        this.repository.findByName("jake1")
+    public void findByNameUsingQuery() {
+        this.repository.findByNameQuery("jake")
                        .doOnNext(c -> log.info("{}", c))
                        .as(StepVerifier::create)
                        .assertNext(c -> Assertions.assertEquals("jake@gmail.com", c.getEmail()))
@@ -110,7 +88,7 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
                        .expectComplete()
                        .verify();
 
-        //  Test[2] = Assert on the increase in count
+        //  Test[2] = Assert on the increase in count of total number of customers
         this.repository.count()
                        .as(StepVerifier::create)
                        .expectNext(11L)
@@ -139,41 +117,17 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
 What is the difference between the traditional style to mutating the entity and the reactive sytle of mutating in
 the below Java 17 style of  code
 
- this.repository.findByName("xxx")
-                .doOnNext(c -> c.setName("YYY"));
-
-
  var customer = repository.findByName("xxx")
  customer.setName("yyy"));
 
 
-Traditional (Imperative) Mutation
-
-(a)Synchronous Execution: The method findByName("xxx") returns an entity directly (e.g., Customer object).
-
-(b)Immediate Mutation: The mutation happens immediately after fetching the entity.
-
-(c)Blocking: The thread is blocked while retrieving the entity from the database.
-
-(d)Direct Object Manipulation: The Customer object is modified directly after retrieval.
+# Update Operation in non blocking way
+ this.repository.findByName("xxx")
+                .doOnNext(c -> c.setName("YYY"));
 
 
-Reactive Mutation (Using Project Reactor)
-
-(a)Asynchronous & Non-Blocking: findByName("xxx") likely returns a Mono<Customer> (from Project Reactor), meaning it is
-executed asynchronously and the thread is  not blocked.
-------------------------------------------------------------------------------------------------------
-So when we  say findByName or findByID we will not know when we get the result  because it's  IO .
-So when we get the customer that  time, the doOnNext()  will be setting the name like this.
-------------------------------------------------------------------------------------------------------
-(b)Mutation Happens Within the Reactive Pipeline: doOnNext(c -> c.setName("YYY")) modifies the entity when it is emitted,
-but it does not return a new object.
-
-(c)No Execution Without Subscription: This pipeline alone does not execute unless it is subscribed to
-(e.g., via .subscribe() or .block()).
-
-(d)Declarative Approach: Instead of directly mutating an object, you declare what should happen when the data is available.
-
+Why  are using the doOnNext() operator is mainly because it's non-blocking IO. When we invoke findByID() ,we will not know when we get the result.
+The doOnNext operator will be executed  when we get the customer, so it will now be mutating the customerName without blocking
 
  */
 

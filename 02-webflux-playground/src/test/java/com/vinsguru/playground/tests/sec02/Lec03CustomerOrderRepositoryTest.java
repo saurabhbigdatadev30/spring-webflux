@@ -25,6 +25,7 @@ public class Lec03CustomerOrderRepositoryTest extends AbstractTest {
                       .verify();
     }
 
+    // This test is to check the join between Customer and CustomerOrder to fetch Flux of OrderDetails for a given customer
     @Test
     public void joinCustomerWithCustomerOrder() {
         this.repository.getOrderDetailsJoin("sam")

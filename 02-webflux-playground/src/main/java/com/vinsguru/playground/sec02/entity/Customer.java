@@ -5,8 +5,10 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 /*
-    We do not have @Entity in R2DBC.
-    @Table / @Column are not really required here. but adding it here for your reference...!
+    The @Entity annotation is required for JPA repositories, but for Spring Data R2DBC (reactive repositories),
+    the entity class does not strictly require the @Entity annotation.
+    R2DBC uses mapping based on the class structure and field names.
+    So, your CustomerRepository will work with R2DBC even if Customer is not marked with @Entity
  */
 @Table("customer")
 public class Customer {
