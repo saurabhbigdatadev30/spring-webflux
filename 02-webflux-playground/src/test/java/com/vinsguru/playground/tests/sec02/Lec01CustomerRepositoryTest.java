@@ -18,8 +18,6 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
     @Autowired
     private CustomerRepository repository;
 
-
-
     @Test
     public void findAll() {
         // Get Flux<Customer> from the repository using the native query
@@ -80,7 +78,7 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
         // customer id is the PK & is auto incremental , so this will be set automatically
         customer.setName("marshal");
         customer.setEmail("marshal@gmail.com");
-        this.repository.save(customer)  // Returns the inserted Customer i.e Mono<Customer>
+        this.repository.save(customer)  // returns the inserted Customer i.e Mono<Customer>
                        .doOnNext(c -> log.info(" Customer created is -> {}", c))
                        .as(StepVerifier::create)
                      // Test[1] = Assert that The customerID should not be null
@@ -138,7 +136,7 @@ The doOnNext operator will be executed  when we get the customer, so it will now
                        .filter(Objects::nonNull)
                        .doOnNext(c -> c.setName("noel12"))
                         //.flatMap(c -> this.repository.save(c))
-                         .flatMap(this.repository::save)
+                       .flatMap(this.repository::save)
                        .doOnNext(c -> log.info("{}", c))
                        .as(StepVerifier::create)
                        .assertNext(c -> Assertions.assertEquals("noel12", c.getName()))

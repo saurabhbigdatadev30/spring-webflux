@@ -21,14 +21,12 @@ public class ReactiveWebController {
     /*
         (1) We have a client service that will invoke the Remote Service i.e the Customer Service invokes the Products Service
 
-               (a) From the Customer Service we invoke Products MS to get All the Products() , using RestClient or WebClient
-
+               (a) From the Customer Service we invoke Products MS to get all the Products() , using RestClient or WebClient
                (b) We use Reactive Pipeline using WebClient , to invoke the Products MS.
 
                (c) The Products MS takes 1 sec to return a product. So total time taken to return all the products
                    will be ->
                          No of Products * 1 Sec = <> , in case of traditional approach .
-
                          So if we have n =10 products, we get the response only after 10 sec.
 
             In case of Flux , we will get a Stream of response i.e every sec we get the product until the last product
@@ -61,17 +59,11 @@ public class ReactiveWebController {
     (1)  When the client asks for the product, the WebClient immediately call the product service, and whatever it sends,
          we are able to get it quickly and share it with our caller via flux.
 
-
     (2)  The caller does not have to wait for 10s for the execution to complete .
-         Instead, we can stream the response as and when we get it, we expose it, or we emit via the flux to the caller.
+         Instead, we can stream the response as and when we get it, we expose it, or we emit via the flux to the caller
 
-
-    (3)  When the caller cancels the request, we can detect and react quickly. So the reactive microservices is all about being responsive.
-
-          Entire Stack should be reactive i.e R2DBC , Reactive Kafka , WebClient
-
-
-
+    (3)  When the caller cancels the request, we can detect and react quickly. So the reactive microservices is all about
+         being responsive. Entire Stack should be reactive i.e R2DBC , Reactive Kafka , WebClient
 
       */
 
@@ -87,14 +79,27 @@ public class ReactiveWebController {
     @GetMapping(value = "products/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<Product> getProductsStream() {
         /*
-          As and when we get an item , it will return to doOnNext()
-          When a client closes browser it internally invokes the subscription.cancel() method
+           As and when we get an item from the remote service, it will return to doOnNext()
+           When a client closes browser it internally invokes the subscription.cancel() method , which we can
+           capture using doOnCancel()
+
+           When we subscribe , the Subscriber gets the subscription object.
+           Using this subscription object the Subscriber can request request(n) items from  the producer.
          */
         return this.webClient.get()
                              .uri("/demo01/products")
                              .retrieve()
                              .bodyToFlux(Product.class)
+                             .doOnCancel(() -> log.info("Request Cancelled by the Client"))
                              .doOnNext(p -> log.info("received: {}", p))
+                            /*
+                              After processing 4 records the Publisher crashed .  However,  it was able to give
+                              the partial response & throws some error i.e  exited with the error code.
+                              Using onErrorComplete , completes the Flux stream when an error occurs, instead of propagating the
+                              error downstream.
+                              This means subscribers will not receive an error signal; the stream will just end normally
+                             if any error happens.
+                             */
                              .onErrorComplete();
     }
 

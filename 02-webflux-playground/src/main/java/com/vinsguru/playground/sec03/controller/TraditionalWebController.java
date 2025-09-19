@@ -1,5 +1,6 @@
 package com.vinsguru.playground.sec03.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -14,9 +15,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("traditional")
+@Slf4j
 public class TraditionalWebController {
 
-    private static final Logger log = LoggerFactory.getLogger(TraditionalWebController.class);
+
+    // We no longer use RestTemplate since it is deprecated
+    // private final RestTemplate restTemplate = new RestTemplate();
     private final RestClient restClient = RestClient.builder()
                                                     .requestFactory(new JdkClientHttpRequestFactory())
                                                     .baseUrl("http://localhost:7070")
@@ -33,6 +37,13 @@ public class TraditionalWebController {
         return list;
     }
 
+    /*
+        This method returns a Flux<Product> instead of List<Product>.
+        We convert the List<Product> to Flux<Product> using Flux.fromIterable().
+        This is blocking code since we are using RestClient which is a blocking client.
+        In a real-world scenario, we would use a non-blocking client like WebClient to
+        make non-blocking calls to the external service.
+     */
     @GetMapping("products2")
     public Flux<Product> getProducts2() {
         var listProducts = this.restClient.get()
