@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record OrderDetails(UUID orderId,
+                           Integer productId,
+                           Integer customerId,
                            String customerNameTest1Test2,
                            String productNameTest1Test2,
                            Integer amount,

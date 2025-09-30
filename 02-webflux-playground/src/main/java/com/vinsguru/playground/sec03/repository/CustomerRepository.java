@@ -18,4 +18,11 @@ public interface CustomerRepository extends ReactiveCrudRepository<Customer, Int
 
     Flux<Customer> findBy(Pageable pageable);
 
+    @Query(value = "SELECT * FROM customer")
+    Flux<Customer> fectchAllCustomers();
+
+    @Query(value = "SELECT customer.ID, customer.NAME, customer.EMAIL FROM customer WHERE customer.EMAIL LIKE CONCAT('%', ?1)")
+    Flux<Customer> findByEmailEndingWithQuery(String email);
+
+
 }

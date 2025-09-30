@@ -5,6 +5,7 @@ import com.vinsguru.playground.sec03.entity.Customer;
 
 public class EntityDtoMapper {
 
+    // From Dto to Entity
     public static Customer toEntity(CustomerDto dto){
         var customer = new Customer();
         customer.setName(dto.name());
@@ -13,6 +14,7 @@ public class EntityDtoMapper {
         return customer;
     }
 
+    // From Entity to Dto
     public static CustomerDto toDto(Customer customer){
         return new CustomerDto(
                 customer.getId(),

@@ -39,6 +39,11 @@ public class Lec02ProductRepositoryTest extends AbstractTest {
 
     @Test
     public void pageable() {
+        /*
+            Executing SQL statement with page 0 and size 3 and sort by price ascending is
+            SELECT PRODUCT.ID, PRODUCT.DESCRIPTION, PRODUCT.PRICE FROM PRODUCT ORDER BY PRODUCT.PRICE ASC
+              LIMIT 3
+         */
         this.repository.findBy(PageRequest.of(0, 3).withSort(Sort.by("price").ascending()))
                        .doOnNext(p -> log.info("{}", p))
                        .as(StepVerifier::create)
@@ -51,7 +56,7 @@ public class Lec02ProductRepositoryTest extends AbstractTest {
 
     @Test
     public void pageableTest() {
-        this.repository.findBy(PageRequest.of(1, 3).withSort(Sort.by("price").ascending()))
+        this.repository.findBy(PageRequest.of(1, 3).withSort(Sort.by("price").descending()))
                 .doOnNext(p -> log.info("{}", p))
                 .subscribe()
                 ;

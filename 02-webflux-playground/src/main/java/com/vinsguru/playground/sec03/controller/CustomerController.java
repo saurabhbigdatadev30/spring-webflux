@@ -27,39 +27,46 @@ public class CustomerController {
     public Mono<List<CustomerDto>> allCustomers(@RequestParam(defaultValue = "1") Integer page,
                                                 @RequestParam(defaultValue = "3") Integer size) {
         return this.customerService.getAllCustomers(page, size)
-                                    .collectList();
+                .collectList();
     }
 
     @GetMapping("{id}")
     public Mono<ResponseEntity<CustomerDto>> getCustomer(@PathVariable Integer id) {
         return this.customerService.getCustomerById(id)
-                              //   .map(dto -> ResponseEntity.ok(dto))
-                                   .map(ResponseEntity::ok)
-                                   .defaultIfEmpty(ResponseEntity.notFound().build());
+                //   .map(dto -> ResponseEntity.ok(dto))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
-
 
     @PostMapping
     public Mono<CustomerDto> saveCustomer(@RequestBody Mono<CustomerDto> mono) {
         return this.customerService.saveCustomer(mono);
+        // To return response entity with status code
     }
+
+    public Mono<ResponseEntity<CustomerDto>> saveCustomerUpdated(@RequestBody Mono<CustomerDto> mono) {
+        return this.customerService.saveCustomer(mono)
+                //   .map(dto -> ResponseEntity.ok(dto))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
 
     @PutMapping("{id}")
     public Mono<ResponseEntity<CustomerDto>> updateCustomer(@PathVariable Integer id, @RequestBody Mono<CustomerDto> mono) {
         return this.customerService.updateCustomer(id, mono)
-                              //   .map(dto -> ResponseEntity.ok(dto))
-                                   .map(ResponseEntity::ok)
-                                   .defaultIfEmpty(ResponseEntity.notFound().build());
+                //   .map(dto -> ResponseEntity.ok(dto))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("{id}")
     public Mono<ResponseEntity<Void>> deleteCustomer(@PathVariable Integer id) {
         return this.customerService.deleteCustomerById(id)
-                               // Using filter we check that the this.customerService.deleteCustomerById(id) is true
-                                   .filter(b -> b)
-                                   .map(b -> ResponseEntity.ok().<Void>build())
-                                   .defaultIfEmpty(ResponseEntity.notFound().build());
+                // Using filter we check that the this.customerService.deleteCustomerById(id) is true
+                .filter(b -> b)
+                .map(b -> ResponseEntity.ok().<Void>build())
+                .defaultIfEmpty(ResponseEntity.notFound().build());
 
 
        /*

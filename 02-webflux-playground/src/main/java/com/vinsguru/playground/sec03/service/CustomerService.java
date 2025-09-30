@@ -20,6 +20,16 @@ public class CustomerService {
                                       .map(EntityDtoMapper::toDto);
     }
 
+    public  Flux<CustomerDto> fecthAllCustomers(){
+        return this.customerRepository.fectchAllCustomers()
+                .map(EntityDtoMapper::toDto);
+    }
+
+    public Flux<CustomerDto> fetchAllCustomers() {
+        return this.customerRepository.fectchAllCustomers()
+                .map(EntityDtoMapper::toDto);
+    }
+
     public Flux<CustomerDto> getAllCustomers(Integer page, Integer size) {
         return this.customerRepository.findBy(PageRequest.of(page - 1, size)) // zero-indexed
                                       .map(EntityDtoMapper::toDto);
@@ -36,6 +46,8 @@ public class CustomerService {
                    .flatMap(this.customerRepository::save)
                    .map(EntityDtoMapper::toDto);
     }
+
+
 
     public Mono<CustomerDto> updateCustomer(Integer id, Mono<CustomerDto> mono) {
         return this.customerRepository.findById(id)
