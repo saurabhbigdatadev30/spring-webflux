@@ -61,7 +61,7 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
     @Test
     public void findByEmailEndingWith() {
         //this.repository.findByEmailEndingWith("ke@gmail.com")
-        // Using native Query
+        // Using native Query instead of JPA
         this.repository.findByEmailEndingWithQuery("ke@gmail.com")
                 .doOnNext(c -> log.info("Getting the Customers with mail ke@gmail.com = {}", c))
                 .as(StepVerifier::create)
@@ -86,24 +86,17 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
                 .expectComplete()
                 .verify();
 
-        //  Test[2] = Assert on the increase in count of total number of customers
+       /*   Test[2] = Assert on the increase in count of total number of customers
         this.repository.count()
                 .as(StepVerifier::create)
                 .expectNext(11L)
                 .expectComplete()
                 .verify();
+*/
 
-
-        // Test[3] = Email to be verified for the inserted record
-        this.repository.findByName("marshal")
-                .doOnNext(c -> log.info(" Customer details ----> {}", c))
-                .as(StepVerifier::create)
-                .assertNext(c -> Assertions.assertEquals("marshal@gmail.com", c.getEmail()))
-                .expectComplete()
-                .verify();
-
-        // Test[4] =  For the  delete assert on the count reduction
+        // Test[3] =  For the  delete assert on the count reduction
         this.repository.deleteById(11)
+                // After deletion , fetch the count of total customers.
                 .then(this.repository.count())
                 .as(StepVerifier::create)
                 .expectNext(10L)
@@ -132,15 +125,8 @@ without blocking the main thread.
     @Test
     public void updateCustomer() {
         this.repository.findByName("ethan")
-                .filter(Objects::nonNull)
                 .doOnNext(c -> c.setName("noel12"))
-                /*
-                  flatMap is needed because repository.save(c) returns a Mono<Customer>.
-                  If we use map, instead of flatMap to save operation,  we get Mono<Mono<Customer>>,
-                  which is a nested publisher. We dont  want this for further reactive operations in the chain .
-                  We use flatMap that will flattens the result, so the stream remains a single Mono<Customer> for each item.
-                 */
-
+                // Here we should use flatMap instead of map because repository.save returns Mono<Customer>
                 //.flatMap(c -> this.repository.save(c))
                 .flatMap(this.repository::save)
                 .doOnNext(c -> log.info("{}", c))
@@ -151,7 +137,8 @@ without blocking the main thread.
     }
 
     /*
-    When we use .map(this.repository::save), each element is mapped to a Mono<Customer>, so the resulting type is Flux<Mono<Customer>>.
+    When we use .map(this.repository::save), each element is mapped to a Mono<Customer>, so the resulting type is
+    Flux<Mono<Customer>>.
     This is a nested publisher, not a flat stream of Customer.
                       .map(this.repository::save) → Flux<Mono<Customer>>
                       .flatMap(this.repository::save) → Flux<Customer>

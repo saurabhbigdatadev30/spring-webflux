@@ -20,11 +20,6 @@ public class CustomerService {
                                       .map(EntityDtoMapper::toDto);
     }
 
-    public  Flux<CustomerDto> fecthAllCustomers(){
-        return this.customerRepository.fectchAllCustomers()
-                .map(EntityDtoMapper::toDto);
-    }
-
     public Flux<CustomerDto> fetchAllCustomers() {
         return this.customerRepository.fectchAllCustomers()
                 .map(EntityDtoMapper::toDto);
@@ -47,16 +42,36 @@ public class CustomerService {
                    .map(EntityDtoMapper::toDto);
     }
 
+/*
+ 1. map wraps the returned Mono and gives you a Mono<Mono<Customer>>.
+ 2. The inner Mono is not subscribed, so the save does not execute.
+ 3. flatMap flattens the inner Mono i.e Mono<Mono<Customer>> => into Mono<Customer> and subscribes to it as part of the chain
+    the save actually runs.
+ */
+   public void saveCustomerTest(Mono<CustomerDto> mono) {
+      var result =   mono.map(EntityDtoMapper::toEntity)
+                       // Since we are using map, we get Mono<Mono
+                        .map(this.customerRepository::save)
+                        .subscribe();
 
-
-    public Mono<CustomerDto> updateCustomer(Integer id, Mono<CustomerDto> mono) {
-        return this.customerRepository.findById(id)
-                                      .flatMap(entity -> mono)
+   }
+   /*
+    1. First we try to find the customer by ID. If found, we proceed to update.
+      a. When we execute customerRepository.findById(customerID)  & only if customer with given ID exists .... the stream is
+         proceeded further.
+      b. If customerRepository.findById(customerID) not found ..  then Spring Data returns Mono.empty() , without executing
+          the rest of the chain.
+    */
+    public Mono<CustomerDto> updateCustomer(Integer customerID, Mono<CustomerDto> customerDto) {
+        return this.customerRepository.findById(customerID)
+                                      .flatMap(entity -> customerDto)
                                       .map(EntityDtoMapper::toEntity)
-                                      .doOnNext(c -> c.setId(id)) // this is safe
+                                      .doOnNext(c -> c.setId(customerID)) // this is safe
                                       .flatMap(this.customerRepository::save)
                                       .map(EntityDtoMapper::toDto);
     }
+
+
 
     public Mono<Boolean> deleteCustomerById(Integer id){
         return this.customerRepository.deleteCustomerById(id);

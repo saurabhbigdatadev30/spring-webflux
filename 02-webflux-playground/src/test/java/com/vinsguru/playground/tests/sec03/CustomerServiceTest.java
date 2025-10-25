@@ -25,16 +25,14 @@ public class CustomerServiceTest {
     @Test
     public void allCustomers() {
         this.client.get()
-                   .uri("/customers")
+                   .uri("/customers/fetchAllCustomersX")
                    .exchange()
                    .expectStatus().is2xxSuccessful()
                    .expectHeader().contentType(MediaType.APPLICATION_JSON)
                    .expectBodyList(CustomerDto.class)
-                   .value(list -> log.info("{}", list))
+                   .value(list -> log.info("Customer details  {}", list))
                    .hasSize(10);
     }
-
-
 
     @Test
     public void paginatedCustomers() {

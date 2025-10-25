@@ -23,13 +23,19 @@ public class CustomerController {
         return this.customerService.getAllCustomers();
     }
 
-    @GetMapping("paginated")
-    public Mono<List<CustomerDto>> allCustomers(@RequestParam(defaultValue = "1") Integer page,
-                                                @RequestParam(defaultValue = "3") Integer size) {
-        return this.customerService.getAllCustomers(page, size)
-                .collectList();
+    @GetMapping("/fetchAllCustomersX")
+    public Flux<CustomerDto> fetchAllCustomers() {
+        return this.customerService.fetchAllCustomers();
     }
 
+    // http://localhost:8081/customers/paginated?page=1&size=3"
+    @GetMapping("paginated")
+    public Flux<CustomerDto> allCustomers(@RequestParam(defaultValue = "1") Integer page,
+                                          @RequestParam(defaultValue = "3") Integer size) {
+        return this.customerService.getAllCustomers(page, size);
+
+    }
+    // http://localhost:8081/customers/2
     @GetMapping("{id}")
     public Mono<ResponseEntity<CustomerDto>> getCustomer(@PathVariable Integer id) {
         return this.customerService.getCustomerById(id)
@@ -44,7 +50,9 @@ public class CustomerController {
         // To return response entity with status code
     }
 
-    public Mono<ResponseEntity<CustomerDto>> saveCustomerUpdated(@RequestBody Mono<CustomerDto> mono) {
+    @PostMapping("persistCustomer")
+    public Mono<ResponseEntity<CustomerDto>> saveCustomerUpdated(@RequestBody Mono<CustomerDto> mono)
+    {
         return this.customerService.saveCustomer(mono)
                 //   .map(dto -> ResponseEntity.ok(dto))
                 .map(ResponseEntity::ok)
@@ -64,7 +72,7 @@ public class CustomerController {
     public Mono<ResponseEntity<Void>> deleteCustomer(@PathVariable Integer id) {
         return this.customerService.deleteCustomerById(id)
                 // Using filter we check that the this.customerService.deleteCustomerById(id) is true
-                .filter(b -> b)
+                .filter(b -> b)  // If true then proceed to map else returns defaultIfEmpty
                 .map(b -> ResponseEntity.ok().<Void>build())
                 .defaultIfEmpty(ResponseEntity.notFound().build());
 

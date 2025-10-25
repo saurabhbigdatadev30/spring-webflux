@@ -1,4 +1,4 @@
-package com.vinsguru.playground.sec02.dto;
+package com.vinsguru.playground.sec03.dto;
 
 import java.time.Instant;
 import java.util.UUID;

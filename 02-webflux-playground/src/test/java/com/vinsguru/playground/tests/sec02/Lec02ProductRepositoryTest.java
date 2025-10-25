@@ -18,6 +18,17 @@ public class Lec02ProductRepositoryTest extends AbstractTest {
     private ProductRepository repository;
 
     @Test
+    public void findAllProducts() {
+        this.repository.findAll()
+                       .doOnNext(p -> log.info("{}", p))
+                       .as(StepVerifier::create)
+                       .expectNextCount(10)
+                       .expectComplete()
+                       .verify();
+    }
+
+
+    @Test
     public void findByPriceRange() {
         this.repository.findByPriceBetween(750, 1000)
                        .doOnNext(p -> log.info("{}", p))
@@ -39,11 +50,6 @@ public class Lec02ProductRepositoryTest extends AbstractTest {
 
     @Test
     public void pageable() {
-        /*
-            Executing SQL statement with page 0 and size 3 and sort by price ascending is
-            SELECT PRODUCT.ID, PRODUCT.DESCRIPTION, PRODUCT.PRICE FROM PRODUCT ORDER BY PRODUCT.PRICE ASC
-              LIMIT 3
-         */
         this.repository.findBy(PageRequest.of(0, 3).withSort(Sort.by("price").ascending()))
                        .doOnNext(p -> log.info("{}", p))
                        .as(StepVerifier::create)
@@ -56,10 +62,23 @@ public class Lec02ProductRepositoryTest extends AbstractTest {
 
     @Test
     public void pageableTest() {
-        this.repository.findBy(PageRequest.of(1, 3).withSort(Sort.by("price").descending()))
+        this.repository.findBy(PageRequest.of(2, 3).withSort(Sort.by("price").descending()))
                 .doOnNext(p -> log.info("{}", p))
-                .subscribe()
-                ;
+                .subscribe();
+    }
+
+    @Test
+    public void pageableTest1() {
+        this.repository.findBy(PageRequest.of(0, 3))
+                .doOnNext(p -> log.info("{}", p))
+                .subscribe();
+    }
+
+    @Test
+    public void pageableTest2() {
+        this.repository.findBy(PageRequest.of(1, 3))
+                .doOnNext(p -> log.info("{}", p))
+                .subscribe();
     }
 
     /*
