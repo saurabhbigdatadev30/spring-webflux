@@ -3,20 +3,26 @@ package com.vinsguru.playground.sec03.controller;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vinsguru.playground.sec03.dto.CustomerDto;
 import com.vinsguru.playground.sec03.service.CustomerService;
+import com.vinsguru.playground.sec03.service.R2DBCAsynchService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.List;
-
+@Slf4j
 @RestController
 @RequestMapping("customers")
 public class CustomerController {
 
     @Autowired
     private CustomerService customerService;
+
+    @Autowired
+    R2DBCAsynchService asynchDemo;
 
     @GetMapping
     public Flux<CustomerDto> allCustomers() {
@@ -28,6 +34,34 @@ public class CustomerController {
         return this.customerService.fetchAllCustomers();
     }
 
+    @GetMapping("/async-execution")
+    public Mono<String> demonstrateAsyncExecution() {
+        log.info("HTTP Request received at {} " , LocalDateTime.now());
+
+        // Start the demonstration
+        asynchDemo.demonstrateAsyncNonBlockingExecution();
+
+        // Return immediately without blocking
+        return Mono.just("Async demonstration started! Check console for execution details. Time: " + LocalDateTime.now());
+    }
+
+    @GetMapping("/concurrent-queries")
+    public Mono<String> demonstrateConcurrentQueries() {
+        asynchDemo.demonstrateConcurrentQueries();
+        methodX();
+        return Mono.just(" Concurrent queries started! Check console for details.");
+    }
+
+    private void methodX() {
+        log.info("methodX() is executing in Thread:   {}", Thread.currentThread().getName());
+        log.info("Time: {}", LocalDateTime.now());
+        log.info("methodX is complete at = {}" , LocalDateTime.now());
+    }
+
+    /*
+      If we have million of records in the customer table, returning all the records in a single API call is not a good idea.
+      Instead we should implement pagination.
+     */
     // http://localhost:8081/customers/paginated?page=1&size=3"
     @GetMapping("paginated")
     public Flux<CustomerDto> allCustomers(@RequestParam(defaultValue = "1") Integer page,
@@ -77,36 +111,7 @@ public class CustomerController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
 
 
-       /*
 
-               (a)  If the customer is found , the this.customerService.deleteCustomerById(id) deletes &   returns empty
-
-               (b)  If the customer is not found, then also the this.customerService.deleteCustomerById(id) returns empty
-
-
-
-                To address this issue we use @Query = Modifying
-                        Mono<Integer> deleteByLastName  - Number of  rows were affected
-                        Mono<Void> deleteByLastName -
-                        Mono<Boolean> deleteByLastName  - If the rows were affected
-
-
-                         @Modifying // for demo
-                         @Query("delete from customer where id=:id")
-                         Mono<Boolean> deleteCustomerById(Integer id);
-
-                So now in the @Controller
-
-                   public Mono<ResponseEntity<Void>> deleteCustomer(@PathVariable Integer id) {
-
-                         return this.customerService.deleteCustomerById(id) returns boolean
-
-                         Using filter(b ->b), this checks that this.customerService.deleteCustomerById(id) returns true or false
-                                   (a) If it returns true , then   .map(b -> ResponseEntity.ok().<Void>build())
-                                   (b) If it returns false , then  .defaultIfEmpty(ResponseEntity.notFound().build());
-
-
-         */
     }
 
 }

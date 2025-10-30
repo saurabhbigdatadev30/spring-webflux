@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.test.StepVerifier;
 
-import java.util.Objects;
-
 public class Lec01CustomerRepositoryTest extends AbstractTest {
 
     private static final Logger log = LoggerFactory.getLogger(Lec01CustomerRepositoryTest.class);
@@ -19,10 +17,10 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
     private CustomerRepository repository;
 
     @Test
-    public void findAll() {
-        // Get Flux<Customer> from the repository using the native query
-        this.repository.fectchAllCustomers()
-                .doOnNext(c -> log.info("Get the Customer from Publisher ===>>> {}", c))
+    public void getAllCustomers()
+    {
+        this.repository.findAll()
+                .doOnNext(c -> log.info("Customers =  {} ", c ))
                 .as(StepVerifier::create)
                 .expectNextCount(10)
                 .expectComplete()
@@ -51,12 +49,6 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
 // Java.lang.AssertionError: expectation "assertNext" failed (expected: onNext(); actual: onComplete())
 
 
-    /*
-        Query methods
-        https://docs.spring.io/spring-data/relational/reference/r2dbc/query-methods.html
-
-        Task: find all customers whose email ending with "ke@gmail.com"
-    */
 
     @Test
     public void findByEmailEndingWith() {

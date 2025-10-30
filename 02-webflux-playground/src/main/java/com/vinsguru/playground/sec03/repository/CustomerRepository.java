@@ -16,9 +16,10 @@ public interface CustomerRepository extends ReactiveCrudRepository<Customer, Int
     @Query("delete from customer where id=:id")
     Mono<Boolean> deleteCustomerById(Integer id);
 
-    // pagination support , Spring Data will automatically generate the limit & offset based on the Pageable parameter
-    /*
 
+    /*
+     Spring Data will automatically generate the limit & offset based on the Pageable parameter .
+       this.customerRepository.findBy(PageRequest.of(page - 1, size))
      */
     Flux<Customer> findBy(Pageable pageable);
 

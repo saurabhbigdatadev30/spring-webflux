@@ -34,6 +34,26 @@ public class CustomerServiceTest {
                    .hasSize(10);
     }
 
+
+    @Test
+    public void fetchAllCustomers() {
+        this.client.get()
+                .uri("/customers/fetchAllCustomersX")
+                .exchange()
+                .expectStatus().is2xxSuccessful()
+                .expectBody()
+                .consumeWith(r -> log.info("\n{}", new String(Objects.requireNonNull(r.getResponseBody()))))
+                .jsonPath("$.length()").isEqualTo(10)
+                .jsonPath("$[0].id").isEqualTo(1)
+                .jsonPath("$[0].name").isEqualTo("sam")
+                .jsonPath("$[0].email").isEqualTo("sam@gmail.com")
+                .jsonPath("$[1].id").isEqualTo(2)
+                .jsonPath("$[1].name").isEqualTo("mike")
+                .jsonPath("$[1].email").isEqualTo("mike@gmail.com")
+               ;
+    }
+
+
     @Test
     public void paginatedCustomers() {
         this.client.get()
@@ -75,17 +95,6 @@ public class CustomerServiceTest {
                    .jsonPath("$.name").isEqualTo("sam")
                    .jsonPath("$.email").isEqualTo("sam@gmail.com");
     }
-              /*
-                customerById returns 1 JSON , not array ,
-                 {"id":1,"name":"sam","email":"sam@gmail.com"}
-
-
-                  so we don't need
-
-                 .jsonPath("$[0].name").isEqualTo("sam")
-
-
-               */
 
     @Test
     public void createAndDeleteCustomer() {
