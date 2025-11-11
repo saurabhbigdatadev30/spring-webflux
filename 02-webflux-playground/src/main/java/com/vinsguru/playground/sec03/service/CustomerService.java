@@ -6,6 +6,7 @@ import com.vinsguru.playground.sec03.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -56,11 +57,11 @@ public class CustomerService {
 
    }
    /*
-    1. First we try to find the customer by ID. If found, we proceed to update.
-      a. When we execute customerRepository.findById(customerID)  & only if customer with given ID exists .... the stream is
-         proceeded further.
-      b. If customerRepository.findById(customerID) not found ..  then Spring Data returns Mono.empty() , without executing
-          the rest of the chain.
+      Whatever we have in the table fetched using findById(customerID) will be replaced by the incoming customerDto.
+        1. We first fetch the existing entity using findById(customerID)
+        2. Replace the existing entity with the incoming customerDto
+        3. Save the updated entity back to the database .
+        4. Return the updated entity as CustomerDto.
     */
     public Mono<CustomerDto> updateCustomer(Integer customerID, Mono<CustomerDto> customerDto) {
         return this.customerRepository.findById(customerID)
@@ -69,6 +70,13 @@ public class CustomerService {
                                       .doOnNext(c -> c.setId(customerID)) // this is safe
                                       .flatMap(this.customerRepository::save)
                                       .map(EntityDtoMapper::toDto);
+    }
+
+    // Why we use flatMap  instead of map?
+    public Disposable updateCustomer1(Integer customerID, Mono<CustomerDto> customerDto) {
+        return this.customerRepository.findById(customerID)
+                .map(entity -> customerDto)
+                .subscribe();
     }
 
 

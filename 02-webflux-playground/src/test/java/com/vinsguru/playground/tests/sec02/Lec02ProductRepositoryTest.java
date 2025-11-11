@@ -48,6 +48,36 @@ public class Lec02ProductRepositoryTest extends AbstractTest {
                 .verify();
     }
 
+
+
+    @Test
+    public void pageableTest() {
+        this.repository.findBy(PageRequest.of(2, 4))
+                .doOnNext(p -> log.info("{}", p))
+                .subscribe();
+    }
+
+    /*
+     a. When we set PageRequest.of(0,4)
+        Page = 0
+            Executing SQL statement [SELECT PRODUCT.ID, PRODUCT.DESCRIPTION, PRODUCT.PRICE FROM PRODUCT LIMIT 4]
+             Product{id=1, description='iphone 20', price=750}
+             Product{id=2, description='iphone 18', price=750}
+             Product{id=3, description='ipad', price=800}
+             Product{id=4, description='macbook pro', price=1200}
+
+       b. When we set PageRequest.of(1,4) , we get  id=5 till id= 8
+          Page = 1
+             Executing SQL statement [SELECT PRODUCT.ID, PRODUCT.DESCRIPTION, PRODUCT.PRICE FROM PRODUCT OFFSET 4 ROWS FETCH FIRST 4 ROWS ONLY]
+              Product{id=5, description='apple watch', price=400}
+              Product{id=6, description='airpods', price=150}
+              Product{id=7, description='airpods pro', price=250}
+              Product{id=8, description='beats headphones', price=350}
+     */
+
+
+
+
     @Test
     public void pageable() {
         this.repository.findBy(PageRequest.of(0, 3).withSort(Sort.by("price").ascending()))
@@ -60,12 +90,7 @@ public class Lec02ProductRepositoryTest extends AbstractTest {
                        .verify();
     }
 
-    @Test
-    public void pageableTest() {
-        this.repository.findBy(PageRequest.of(2, 3).withSort(Sort.by("price").descending()))
-                .doOnNext(p -> log.info("{}", p))
-                .subscribe();
-    }
+
 
     @Test
     public void pageableTest1() {

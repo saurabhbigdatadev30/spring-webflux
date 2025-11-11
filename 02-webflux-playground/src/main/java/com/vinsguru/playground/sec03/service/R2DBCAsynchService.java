@@ -25,7 +25,7 @@ public class R2DBCAsynchService {
 
         // Start the asynchronous query
         Flux<Customer> customerFlux = customerRepository.findByEmailEndingWithQuery("ke@gmail.com")
-                .delayElements(Duration.ofMillis(9000)) // Simulate processing delay
+                .delayElements(Duration.ofMillis(9000)) // Simulate processing delay of the DB response
                 .doOnSubscribe(subscription ->
                               log.info("[findByEmailEndingWithQuery] Query started on thread: {} " , Thread.currentThread().getName()))
                 .doOnNext(customer -> {

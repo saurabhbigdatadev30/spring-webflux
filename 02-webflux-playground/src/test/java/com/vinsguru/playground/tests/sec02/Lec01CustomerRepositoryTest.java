@@ -19,8 +19,8 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
     @Test
     public void getAllCustomers()
     {
-        this.repository.findAll()
-                .doOnNext(c -> log.info("Customers =  {} ", c ))
+        this.repository.fectchAllCustomers()
+                .doOnNext(c -> log.info("Customers =>  {} ", c ))
                 .as(StepVerifier::create)
                 .expectNextCount(10)
                 .expectComplete()
@@ -71,22 +71,13 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
         customer.setName("marshal");
         customer.setEmail("marshal@gmail.com");
         this.repository.save(customer)  // returns the inserted Customer i.e Mono<Customer>
-                .doOnNext(c -> log.info(" Customer created is -> {}", c))
+                .doOnNext(c -> log.info(" Customer inserted is -> {}", c))
                 .as(StepVerifier::create)
                 // Test[1] = Assert that The customerID should not be null
                 .assertNext(c -> Assertions.assertNotNull(c.getId()))
                 .expectComplete()
                 .verify();
 
-       /*   Test[2] = Assert on the increase in count of total number of customers
-        this.repository.count()
-                .as(StepVerifier::create)
-                .expectNext(11L)
-                .expectComplete()
-                .verify();
-*/
-
-        // Test[3] =  For the  delete assert on the count reduction
         this.repository.deleteById(11)
                 // After deletion , fetch the count of total customers.
                 .then(this.repository.count())
@@ -103,7 +94,6 @@ the below Java 17 style of  code
  var customer = repository.findByName("xxx")
  customer.setName("yyy"));
 
-
 # Update Operation in non blocking way using doOnNext()
  this.repository.findByName("xxx")
                 .doOnNext(c -> c.setName("YYY"));
@@ -118,8 +108,6 @@ without blocking the main thread.
     public void updateCustomer() {
         this.repository.findByName("ethan")
                 .doOnNext(c -> c.setName("noel12"))
-                // Here we should use flatMap instead of map because repository.save returns Mono<Customer>
-                //.flatMap(c -> this.repository.save(c))
                 .flatMap(this.repository::save)
                 .doOnNext(c -> log.info("{}", c))
                 .as(StepVerifier::create)
@@ -128,19 +116,16 @@ without blocking the main thread.
                 .verify();
     }
 
-    /*
-    When we use .map(this.repository::save), each element is mapped to a Mono<Customer>, so the resulting type is
-    Flux<Mono<Customer>>.
-    This is a nested publisher, not a flat stream of Customer.
-                      .map(this.repository::save) → Flux<Mono<Customer>>
-                      .flatMap(this.repository::save) → Flux<Customer>
-
-       The type is not always obvious in the code unless you inspect it or use an operator like .as(StepVerifier::create),
-       which expects a Publisher<T>. If you want a flat stream, use .flatMap instead of .map.
-     */
     @Test
     public void updateCustomerUsingMap() {
         this.repository.findByName("ethan")
+                .doOnNext(c -> c.setName("noel123"))
+                .map(this.repository::save)
+                .as(StepVerifier::create);
+    }
+    @Test
+    public void updateCustomerUsingMap1() {
+        this.repository.findById(1)
                 .doOnNext(c -> c.setName("noel123"))
                 .map(this.repository::save)
                 .as(StepVerifier::create);

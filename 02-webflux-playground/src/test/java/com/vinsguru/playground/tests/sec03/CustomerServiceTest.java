@@ -106,7 +106,7 @@ public class CustomerServiceTest {
                    .uri("/customers")
                 /*
                    understanding the difference between bodyValue vs body
-                   bodyValue takes raw data , while body takes Publisher
+                   bodyValue takes raw data POJO, while body takes Publisher
                  */
                    //.bodyValue(dto)
                    .body(monoCustomer, CustomerDto.class)
@@ -114,10 +114,10 @@ public class CustomerServiceTest {
                    .expectStatus().is2xxSuccessful()
                    .expectBody()
                    .consumeWith(r -> log.info("{}", new String(Objects.requireNonNull(r.getResponseBody()))))
-                   .jsonPath("$.id").isNotEmpty();
-                //  .jsonPath("$.id").isEqualTo(11)
-                 //  .jsonPath("$.name").isEqualTo("marshal")
-                //   .jsonPath("$.email").isEqualTo("marshal@gmail.com");
+                   .jsonPath("$.id").isNotEmpty()
+                   .jsonPath("$.id").isEqualTo(11)
+                   .jsonPath("$.name").isEqualTo("marshal")
+                   .jsonPath("$.email").isEqualTo("marshal@gmail.com");
 
         // delete
         this.client.delete()

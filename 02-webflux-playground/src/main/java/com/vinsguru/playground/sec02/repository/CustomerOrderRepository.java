@@ -11,6 +11,10 @@ import reactor.core.publisher.Flux;
 
 import java.util.UUID;
 
+/*
+    This Repository interface is used to perform CRUD operations on CustomerOrder entity
+    and also contains custom queries to fetch data by joining Customer, Product and CustomerOrder tables.
+ */
 @Repository
 public interface CustomerOrderRepository extends ReactiveCrudRepository<CustomerOrder, UUID> {
 
@@ -61,11 +65,11 @@ public interface CustomerOrderRepository extends ReactiveCrudRepository<Customer
 
     @Query("""
            SELECT
-            c.id as customer_id_Test1_Test2,
+            c.id as customer_id_test1_test2,
             c.email,
             co.order_id,
             co.product_id,
-            c.name AS customer_name_Test1_Test2,
+            c.name AS customer_name_test1_test2,
             co.amount,
             co.order_date
                 FROM
@@ -80,9 +84,9 @@ public interface CustomerOrderRepository extends ReactiveCrudRepository<Customer
       OrderDetails.java class              Holds the result of the query , having the following fields
              orderID                    <==         co.order_id,
              productID                  <==         co.product_id,
-             customerIdTest1Test2       <==         customer_id_Test1_Test2
-             customerNameTest1Test2     <==         customer_name_Test1_Test2
-             productNameTest1Test2      <==         product_name_Test1_Test2
+             customerIdTest1Test2       <==         customer_id_test1_test2
+             customerNameTest1Test2     <==         customer_name_test1_test2
+             productNameTest1Test2      <==         product_name_test1_test2
              amount                     <==         co.amount
              orderDate                  <==         co.order_date
      */

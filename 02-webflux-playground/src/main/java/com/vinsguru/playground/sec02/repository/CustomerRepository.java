@@ -16,7 +16,7 @@ public interface CustomerRepository extends ReactiveCrudRepository<Customer, Int
 
     Flux<Customer> findByEmailEndingWith(String email);
 
-    // Using the native SQL Query for fetching all customers
+    // Using the native SQL Query for fetching all customers , instead of JPA query methods
     @Query(value = "SELECT * FROM customer")
     Flux<Customer> fectchAllCustomers();
 

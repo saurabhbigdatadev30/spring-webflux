@@ -39,7 +39,7 @@ public class Lec03CustomerOrderRepositoryTest extends AbstractTest {
     @Test
     public void orderDetailsByProduct() {
         this.repository.getOrderDetailsByProduct("iphone 20")
-                       .doOnNext(dto -> log.info("{}", dto))
+                       .doOnNext(dto -> log.info("Get{}", dto))
                        .as(StepVerifier::create)
                        .assertNext(dto -> Assertions.assertEquals(975, dto.amount()))
                        .assertNext(dto -> Assertions.assertEquals(950, dto.amount()))
