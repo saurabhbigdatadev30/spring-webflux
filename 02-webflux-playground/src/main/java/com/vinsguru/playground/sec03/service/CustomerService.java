@@ -22,7 +22,7 @@ public class CustomerService {
     }
 
     public Flux<CustomerDto> fetchAllCustomers() {
-        return this.customerRepository.fectchAllCustomers()
+        return this.customerRepository.fectchAllCustomers() // returns Flux<Customer>
                 .map(EntityDtoMapper::toDto);
     }
 
@@ -33,25 +33,20 @@ public class CustomerService {
 
     public Mono<CustomerDto> getCustomerById(Integer id) {
         return this.customerRepository.findById(id) // Returns the Mono<Customer>
-                                      // Mono<Customer> Transform to Mono<CustomerDto>
                                       .map(EntityDtoMapper::toDto);
     }
-
+// Takes Publisher as input parameter and returns Publisher as output
     public Mono<CustomerDto> saveCustomer(Mono<CustomerDto> mono) {
-        return mono.map(EntityDtoMapper::toEntity) // we should do input validation. let's worry about it later!
+        return mono.map(EntityDtoMapper::toEntity)  // Mono<CustomerDto>  -> map() ->  Mono<Customer>
                    .flatMap(this.customerRepository::save)
                    .map(EntityDtoMapper::toDto);
     }
 
 /*
- 1. map wraps the returned Mono and gives you a Mono<Mono<Customer>>.
- 2. The inner Mono is not subscribed, so the save does not execute.
- 3. flatMap flattens the inner Mono i.e Mono<Mono<Customer>> => into Mono<Customer> and subscribes to it as part of the chain
-    the save actually runs.
+
  */
    public void saveCustomerTest(Mono<CustomerDto> mono) {
-      var result =   mono.map(EntityDtoMapper::toEntity)
-                       // Since we are using map, we get Mono<Mono
+        mono.map(EntityDtoMapper::toEntity)
                         .map(this.customerRepository::save)
                         .subscribe();
 
@@ -62,6 +57,7 @@ public class CustomerService {
         2. Replace the existing entity with the incoming customerDto
         3. Save the updated entity back to the database .
         4. Return the updated entity as CustomerDto.
+        Note: If the customerID does not exist in the DB, the Mono will be empty & the rest of the chain will be skipped.
     */
     public Mono<CustomerDto> updateCustomer(Integer customerID, Mono<CustomerDto> customerDto) {
         return this.customerRepository.findById(customerID)
@@ -72,7 +68,15 @@ public class CustomerService {
                                       .map(EntityDtoMapper::toDto);
     }
 
-    // Why we use flatMap  instead of map?
+
+    /*
+    Why we use flatMap  instead of map in the above while replacing the entity with the request DTO?
+    Use flatMap when your mapper returns a Publisher (e.g., Mono/Flux),
+    including repository calls like save(...)
+
+    If the mapper returns a Publisher (Mono or Flux), you need flatMap so the inner publisher is subscribed
+    and its emissions are propagated.
+     */
     public Disposable updateCustomer1(Integer customerID, Mono<CustomerDto> customerDto) {
         return this.customerRepository.findById(customerID)
                 .map(entity -> customerDto)

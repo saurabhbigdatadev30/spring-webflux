@@ -60,7 +60,7 @@ public class CustomerController {
 
     /*
       If we have million of records in the customer table, returning all the records in a single API call is not a good idea.
-      Instead we should implement pagination.
+      Instead, we should implement pagination.
      */
     // http://localhost:8081/customers/paginated?page=1&size=3"
     @GetMapping("paginated")
