@@ -42,14 +42,17 @@ public class CustomerController {
         asynchDemo.demonstrateAsyncNonBlockingExecution();
 
         // Return immediately without blocking
-        return Mono.just("Async demonstration started! Check console for execution details. Time: " + LocalDateTime.now());
+        methodX();
+        log.info("THE MAIN THREAD = {}  is completed at {} ", Thread.currentThread().getName(), LocalDateTime.now());
+        return Mono.just("Main thread is returned @Time = {} " + LocalDateTime.now());
     }
 
     @GetMapping("/concurrent-queries")
     public Mono<String> demonstrateConcurrentQueries() {
         asynchDemo.demonstrateConcurrentQueries();
         methodX();
-        return Mono.just(" Concurrent queries started! Check console for details.");
+        log.info("THE MAIN THREAD = {}  is completed at {} ", Thread.currentThread().getName(), LocalDateTime.now());
+        return Mono.just("Main thread is returned @Time = {} " + LocalDateTime.now());
     }
 
     private void methodX() {
@@ -67,7 +70,6 @@ public class CustomerController {
     public Flux<CustomerDto> allCustomers(@RequestParam(defaultValue = "1") Integer page,
                                           @RequestParam(defaultValue = "3") Integer size) {
         return this.customerService.getAllCustomers(page, size);
-
     }
     // http://localhost:8081/customers/2
     @GetMapping("{id}")

@@ -16,8 +16,14 @@ public class CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
 
+    /*
+         Understanding the m() -- mapper function input & output types
+         Input (per element):  Customer(entity)
+         Output (per element): CustomerDto
+         Resulting publisher: Flux<CustomerDto> ...  Simple value not Publisher
+   */
     public Flux<CustomerDto> getAllCustomers() {
-        return this.customerRepository.findAll()
+        return this.customerRepository.findAll() // returns Flux<Customer>
                                       .map(EntityDtoMapper::toDto);
     }
 
@@ -35,15 +41,10 @@ public class CustomerService {
         return this.customerRepository.findById(id) // Returns the Mono<Customer>
                                       .map(EntityDtoMapper::toDto);
     }
-// Takes Publisher as input parameter and returns Publisher as output
-    public Mono<CustomerDto> saveCustomer(Mono<CustomerDto> mono) {
-        return mono.map(EntityDtoMapper::toEntity)  // Mono<CustomerDto>  -> map() ->  Mono<Customer>
-                   .flatMap(this.customerRepository::save)
-                   .map(EntityDtoMapper::toDto);
-    }
 
 /*
-
+  1. The mapper here (this.customerRepository::save) returns Mono<Customer> i.e a Publisher.
+  2. Using the map with this mapper yields nested  Mono<Mono<Customer>>
  */
    public void saveCustomerTest(Mono<CustomerDto> mono) {
         mono.map(EntityDtoMapper::toEntity)
@@ -51,6 +52,12 @@ public class CustomerService {
                         .subscribe();
 
    }
+    // We use flatMap here because the mapper returns a Publisher (Mono<Customer>)
+    public Mono<CustomerDto> saveCustomer(Mono<CustomerDto> mono) {
+        return mono.map(EntityDtoMapper::toEntity)
+                .flatMap(this.customerRepository::save)
+                .map(EntityDtoMapper::toDto);
+    }
    /*
       Whatever we have in the table fetched using findById(customerID) will be replaced by the incoming customerDto.
         1. We first fetch the existing entity using findById(customerID)
@@ -68,22 +75,20 @@ public class CustomerService {
                                       .map(EntityDtoMapper::toDto);
     }
 
-
     /*
-    Why we use flatMap  instead of map in the above while replacing the entity with the request DTO?
-    Use flatMap when your mapper returns a Publisher (e.g., Mono/Flux),
-    including repository calls like save(...)
+     Usage of map vs flatMap
+       1.  Use map when the mapper returns a simple value i.e not a Publisher e.g converting Entity to Dto or Dto to Entity
 
-    If the mapper returns a Publisher (Mono or Flux), you need flatMap so the inner publisher is subscribed
-    and its emissions are propagated.
+       2.  Use flatMap when the mapper returns a Publisher i.e repository calls like save(...)
+
+          In this case mapper (entity -> customerDto) returns Mono<CustomerDto> which is a Publisher.
+          Wrapping it with map will yield Mono<Mono<CustomerDto>> which is not desired.
      */
     public Disposable updateCustomer1(Integer customerID, Mono<CustomerDto> customerDto) {
         return this.customerRepository.findById(customerID)
                 .map(entity -> customerDto)
                 .subscribe();
     }
-
-
 
     public Mono<Boolean> deleteCustomerById(Integer id){
         return this.customerRepository.deleteCustomerById(id);

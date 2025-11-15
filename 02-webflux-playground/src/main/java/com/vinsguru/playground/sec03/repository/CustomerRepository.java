@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface CustomerRepository extends ReactiveCrudRepository<Customer, Integer> {
 
-    @Modifying // for demo
+    @Modifying
     @Query("delete from customer where id=:id")
     Mono<Boolean> deleteCustomerById(Integer id);
 

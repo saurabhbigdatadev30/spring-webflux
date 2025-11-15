@@ -1,6 +1,7 @@
 package com.vinsguru.playground.tests.sec03;
 
 import com.vinsguru.playground.sec03.dto.CustomerDto;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +31,25 @@ public class CustomerServiceTest {
                    .expectStatus().is2xxSuccessful()
                    .expectHeader().contentType(MediaType.APPLICATION_JSON)
                    .expectBodyList(CustomerDto.class)
-                   .value(list -> log.info("Customer details  {}", list))
+                   .value(list -> log.info("Customer details == {}", list))
                    .hasSize(10);
+    }
+
+    @Test
+    public void getCustomerById() {
+        this.client.get()
+                .uri("/customers/1")
+                .exchange()
+                .expectStatus().is2xxSuccessful()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(CustomerDto.class)
+                .value(dto -> {
+                    log.info("Customer details == {}", dto);
+                      Assertions.assertNotNull(dto);
+                      Assertions.assertEquals(1, dto.id());
+                      Assertions.assertEquals("sam", dto.name());
+                      Assertions.assertEquals("sam@gmail.com", dto.email());
+                });
     }
 
 

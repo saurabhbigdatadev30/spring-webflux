@@ -25,7 +25,7 @@ public class R2DBCAsynchService {
 
         // Start the asynchronous query
         Flux<Customer> customerFlux = customerRepository.findByEmailEndingWithQuery("ke@gmail.com")
-                .delayElements(Duration.ofMillis(9000)) // Simulate processing delay of the DB response
+                .delayElements(Duration.ofMillis(9000)) // Simulate processing delay of the DB response in execution of findByEmailEndingWithQuery
                 .doOnSubscribe(subscription ->
                               log.info("[findByEmailEndingWithQuery] Query started on thread: {} " , Thread.currentThread().getName()))
                 .doOnNext(customer -> {
@@ -43,18 +43,15 @@ public class R2DBCAsynchService {
         // Subscribe to the Flux (this triggers the execution but doesn't block)
         customerFlux.subscribe();
 
-        //  KEY POINT: Thread is NOT blocked - code continues immediately
-        methodX();
-
         // Simulate other work while query executes in background
-         performOtherOperations1();
+         performOtherOperations();
 
         log.info("Main method continues without waiting for DB query!");
-        log.info("End of main execution {}  " , LocalDateTime.now());
+
     }
 
-    private void performOtherOperations1() {
-        log.info("performOtherOperations1() is executing in Thread:   {}", Thread.currentThread().getName());
+    private void performOtherOperations() {
+        log.info("performOtherOperations() is executing in Thread:   {}", Thread.currentThread().getName());
 
         for (int i = 1; i <= 3; i++) {
             log.info("Operation {} completed at {}", i, LocalDateTime.now());
@@ -74,46 +71,49 @@ public class R2DBCAsynchService {
         log.info("methodX is complete at = {}" , LocalDateTime.now());
     }
 
+
+    /**
+     * Demonstrates multiple concurrent R2DBC queries executing asynchronously without blocking each other & also the main thread
+     */
     public void demonstrateConcurrentQueries() {
-        System.out.println("\n--- CONCURRENT QUERIES DEMO ---");
+        log.info("\n---  demonstrateConcurrentQueries started ---");
 
         AtomicInteger completedQueries = new AtomicInteger(0);
 
         Flux<Customer> keCustomers = customerRepository.findByEmailEndingWithQuery("ke@gmail.com")
-                .doOnSubscribe(sub -> System.out.println("Starting ke@gmail.com search on thread " + Thread.currentThread().getName() + "..."))
-                .delayElements(Duration.ofMillis(2000))
+                .doOnSubscribe(sub -> log.info("Starting Query[1] ke@gmail.com search in Thread = {} , @Time = {} " , Thread.currentThread().getName() , LocalDateTime.now()))
+                .delayElements(Duration.ofMillis(3000))
                 .doOnComplete(() -> {
-
-                    int completed = completedQueries.incrementAndGet();
-                    System.out.println(" ke@gmail.com query search completed (" + completed + "/3)");
+                    int count = completedQueries.incrementAndGet();
+                    log.info("Query[1] ke@gmail.com query count = {} completed by thread = {} , at time = {} ", count , Thread.currentThread().getName(), LocalDateTime.now());
                 });
 
         Flux<Customer> exampleCustomer = customerRepository.findByEmailEndingWithQuery("@example.com")
-                .doOnSubscribe(sub -> System.out.println(" Starting @example.com search..." + Thread.currentThread().getName() + "..."))
+                .doOnSubscribe(sub -> log.info("Starting Query[2] @example.com search in Thread = {} , @Time = {} ", Thread.currentThread().getName() , LocalDateTime.now()))
                 .delayElements(Duration.ofMillis(2000))
                 .doOnComplete(() -> {
 
                     int completed = completedQueries.incrementAndGet();
-                    System.out.println("@example.com completed (" + completed + "/3)");
+                    log.info("Query[2] @example.com count = {} completed by thread = {} , at time = {} ", completed , Thread.currentThread().getName(), LocalDateTime.now());
                 });
 
 
         Flux<Customer> getAllCustomers = customerRepository.findAll()
-                .doOnSubscribe(sub -> System.out.println("searching all customer..." + Thread.currentThread().getName() + "..."))
+                .doOnSubscribe(sub -> log.info("Query[3] ... Searching all customer in Thread = {} , @Time = {} ", Thread.currentThread().getName() , LocalDateTime.now()))
                 .delayElements(Duration.ofMillis(500))
                 .doOnComplete(() -> {
 
                     int completed = completedQueries.incrementAndGet();
-                    System.out.println(" Search All  query completed (" + completed + "/3)");
+                    log.info("Query[3] @example.com count = {} completed by thread = {} , at time  = {} ", completed , Thread.currentThread().getName() , LocalDateTime.now());
                 });
 
-        // Subscribe to all queries - they run concurrently!
+        // Subscribe to all the queries - they run concurrently!
         keCustomers.subscribe();
         exampleCustomer.subscribe();
         getAllCustomers.subscribe();
 
-        System.out.println(" All three queries started concurrently!");
-        System.out.println("Main thread complete immediately without blocking  !" + Thread.currentThread().getName() );
+        log.info(" All the three queries started concurrently!");
+
     }
 
 
