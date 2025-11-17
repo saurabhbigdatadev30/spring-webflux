@@ -38,6 +38,16 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
     }
 
     @Test
+    public void getByCustomerId()
+    {
+        this.repository.findById(2)
+                .as(dto -> StepVerifier.create(dto))
+                .assertNext(c -> Assertions.assertEquals("mike", c.getName()))
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
     public void findByNameUsingQuery() {
         this.repository.findByNameQuery("jake")
                 .doOnNext(c -> log.info("{}", c))

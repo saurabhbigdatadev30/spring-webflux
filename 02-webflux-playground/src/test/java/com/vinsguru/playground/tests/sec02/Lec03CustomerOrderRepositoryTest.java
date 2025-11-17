@@ -36,6 +36,7 @@ public class Lec03CustomerOrderRepositoryTest extends AbstractTest {
                 .verify();
     }
 
+    // To DO -> Test the order details and customer details for a given product
     @Test
     public void orderDetailsByProduct() {
         this.repository.getOrderDetailsByProduct("iphone 20")

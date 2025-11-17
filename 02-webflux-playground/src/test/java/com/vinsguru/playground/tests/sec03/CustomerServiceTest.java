@@ -44,7 +44,7 @@ public class CustomerServiceTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(CustomerDto.class)
                 .value(dto -> {
-                    log.info("Customer details == {}", dto);
+                      log.info("Customer details == {}", dto);
                       Assertions.assertNotNull(dto);
                       Assertions.assertEquals(1, dto.id());
                       Assertions.assertEquals("sam", dto.name());

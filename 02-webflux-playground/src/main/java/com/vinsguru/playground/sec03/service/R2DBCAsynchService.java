@@ -92,17 +92,14 @@ public class R2DBCAsynchService {
                 .doOnSubscribe(sub -> log.info("Starting Query[2] @example.com search in Thread = {} , @Time = {} ", Thread.currentThread().getName() , LocalDateTime.now()))
                 .delayElements(Duration.ofMillis(2000))
                 .doOnComplete(() -> {
-
                     int completed = completedQueries.incrementAndGet();
                     log.info("Query[2] @example.com count = {} completed by thread = {} , at time = {} ", completed , Thread.currentThread().getName(), LocalDateTime.now());
                 });
 
-
         Flux<Customer> getAllCustomers = customerRepository.findAll()
-                .doOnSubscribe(sub -> log.info("Query[3] ... Searching all customer in Thread = {} , @Time = {} ", Thread.currentThread().getName() , LocalDateTime.now()))
+                .doOnSubscribe(sub -> log.info("Starting Query[3] ... Searching all customer in Thread = {} , @Time = {} ", Thread.currentThread().getName() , LocalDateTime.now()))
                 .delayElements(Duration.ofMillis(500))
                 .doOnComplete(() -> {
-
                     int completed = completedQueries.incrementAndGet();
                     log.info("Query[3] @example.com count = {} completed by thread = {} , at time  = {} ", completed , Thread.currentThread().getName() , LocalDateTime.now());
                 });

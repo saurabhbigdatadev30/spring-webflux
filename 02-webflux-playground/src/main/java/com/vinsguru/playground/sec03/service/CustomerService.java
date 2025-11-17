@@ -3,13 +3,14 @@ package com.vinsguru.playground.sec03.service;
 import com.vinsguru.playground.sec03.dto.CustomerDto;
 import com.vinsguru.playground.sec03.mapper.EntityDtoMapper;
 import com.vinsguru.playground.sec03.repository.CustomerRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
+@Slf4j
 @Service
 public class CustomerService {
 
@@ -33,6 +34,7 @@ public class CustomerService {
     }
 
     public Flux<CustomerDto> getAllCustomers(Integer page, Integer size) {
+        log.info("Get all customers - page: {}, size: {}", page, size);
         return this.customerRepository.findBy(PageRequest.of(page - 1, size)) // zero-indexed
                                       .map(EntityDtoMapper::toDto);
     }
@@ -78,11 +80,9 @@ public class CustomerService {
     /*
      Usage of map vs flatMap
        1.  Use map when the mapper returns a simple value i.e not a Publisher e.g converting Entity to Dto or Dto to Entity
-
        2.  Use flatMap when the mapper returns a Publisher i.e repository calls like save(...)
-
-          In this case mapper (entity -> customerDto) returns Mono<CustomerDto> which is a Publisher.
-          Wrapping it with map will yield Mono<Mono<CustomerDto>> which is not desired.
+            In this case mapper (entity -> customerDto) returns Mono<CustomerDto> which is a Publisher.
+             Wrapping it with map will yield Mono<Mono<CustomerDto>> which is not desired.
      */
     public Disposable updateCustomer1(Integer customerID, Mono<CustomerDto> customerDto) {
         return this.customerRepository.findById(customerID)
