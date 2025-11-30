@@ -18,12 +18,13 @@ import java.util.List;
 @RequestMapping("customers")
 public class CustomerController {
 
-    @Autowired
-    private CustomerService customerService;
+    private final CustomerService customerService;
+    private final R2DBCAsynchService asynchDemo;
 
-    @Autowired
-    R2DBCAsynchService asynchDemo;
-
+    public CustomerController(CustomerService customerService, R2DBCAsynchService asynchDemo) {
+        this.customerService = customerService;
+        this.asynchDemo = asynchDemo;
+    }
     @GetMapping
     public Flux<CustomerDto> allCustomers() {
         return this.customerService.getAllCustomers();
@@ -51,7 +52,7 @@ public class CustomerController {
     public Mono<String> demonstrateConcurrentQueries() {
         asynchDemo.demonstrateConcurrentQueries();
         methodX();
-        log.info("THE MAIN THREAD = {}  is completed at {} ", Thread.currentThread().getName(), LocalDateTime.now());
+        log.info("THE MAIN THREAD = {} is completed at {} ", Thread.currentThread().getName(), LocalDateTime.now());
         return Mono.just("Main thread is returned @Time = {} " + LocalDateTime.now());
     }
 

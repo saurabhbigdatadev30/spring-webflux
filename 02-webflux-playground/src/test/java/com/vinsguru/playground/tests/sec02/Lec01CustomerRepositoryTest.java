@@ -2,25 +2,25 @@ package com.vinsguru.playground.tests.sec02;
 
 import com.vinsguru.playground.sec02.entity.Customer;
 import com.vinsguru.playground.sec02.repository.CustomerRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.test.StepVerifier;
-
+@Slf4j
 public class Lec01CustomerRepositoryTest extends AbstractTest {
-
-    private static final Logger log = LoggerFactory.getLogger(Lec01CustomerRepositoryTest.class);
+    // Using Lombok @Slf4j annotation to avoid boilerplate code
+    // private static final Logger log = LoggerFactory.getLogger(Lec01CustomerRepositoryTest.class);
 
     @Autowired
     private CustomerRepository repository;
 
     @Test
-    public void getAllCustomers()
-    {
+    public void getAllCustomers() {
         this.repository.fectchAllCustomers()
-                .doOnNext(c -> log.info("Customers =>  {} ", c ))
+                .doOnNext(c -> log.info("Customers returned =>  {} ", c))
                 .as(StepVerifier::create)
                 .expectNextCount(10)
                 .expectComplete()
@@ -38,8 +38,7 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
     }
 
     @Test
-    public void getByCustomerId()
-    {
+    public void getByCustomerId() {
         this.repository.findById(2)
                 .as(dto -> StepVerifier.create(dto))
                 .assertNext(c -> Assertions.assertEquals("mike", c.getName()))
@@ -57,7 +56,6 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
                 .verify();
     }
 // Java.lang.AssertionError: expectation "assertNext" failed (expected: onNext(); actual: onComplete())
-
 
 
     @Test
@@ -133,6 +131,7 @@ without blocking the main thread.
                 .map(this.repository::save)
                 .as(StepVerifier::create);
     }
+
     @Test
     public void updateCustomerUsingMap1() {
         this.repository.findById(1)

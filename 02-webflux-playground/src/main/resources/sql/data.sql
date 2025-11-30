@@ -50,23 +50,21 @@ VALUES
   ('apple tv', 200),
   ('homepod', 300);
 
--- Order 1: sam buys an iphone 20 & iphone 18 , i.e Customer ID = 1  ... , buys product_id = 1 , 2
+-- Order 1: sam buys an iphone 20 & iphone 18
 INSERT INTO customer_order (customer_id, product_id, amount, order_date)
 VALUES
   (1, 1, 950, CURRENT_TIMESTAMP),
   (1, 2, 850, CURRENT_TIMESTAMP);
 
 
-
--- Order 2: mike buys an iphone 20 and mac pro ...  i.e Customer ID = 2 , buys product_id = 1 , 4
+-- Order 2: mike buys an iphone 20 and mac pro
 INSERT INTO customer_order (customer_id, product_id, amount, order_date)
 VALUES
   (2, 1, 975, CURRENT_TIMESTAMP),
   (2, 4, 2999, CURRENT_TIMESTAMP);
 
 
-
--- Order 3: jake buys an iphone 18 & ipad .. Customer ID =  3 buys productID
+-- Order 3: jake buys an iphone 18 & ipad
 INSERT INTO customer_order (customer_id, product_id, amount, order_date)
 VALUES
   (3, 2, 750, CURRENT_TIMESTAMP),

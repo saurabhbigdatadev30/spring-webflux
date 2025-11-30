@@ -20,8 +20,15 @@ public interface CustomerRepository extends ReactiveCrudRepository<Customer, Int
     @Query(value = "SELECT * FROM customer")
     Flux<Customer> fectchAllCustomers();
 
-    // Using the native SQL Query
-    @Query(value = "SELECT customer.ID, customer.NAME, customer.EMAIL FROM customer WHERE customer.EMAIL LIKE CONCAT('%', ?1)")
-    Flux<Customer> findByEmailEndingWithQuery(String email);
+
+// Multi-line Query from java 15 onwards
+  @Query("""
+            SELECT customer.ID,
+                   customer.NAME,
+                   customer.EMAIL
+            FROM customer
+            WHERE customer.EMAIL LIKE CONCAT('%', ?1)
+         """)
+  Flux<Customer> findByEmailEndingWithQuery(String email);
 
 }

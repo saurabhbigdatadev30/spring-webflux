@@ -51,6 +51,26 @@ public class CustomerServiceTest {
                       Assertions.assertEquals("sam@gmail.com", dto.email());
                 });
     }
+/*
+  Instead of mapping the response to CustomerDto.class , we can use JSONPath to verify specific fields in the JSON response.
+  This is useful when we want to verify only certain fields and not map the entire response to a POJO.
+  This approach is also helpful when the response structure is complex or when we want to avoid creating multiple POJO classes
+
+ */
+
+    @Test
+    public void getCustomerByIdUsingJsonPath(){
+        this.client.get()
+                .uri("/customers/1")
+                .exchange()
+                .expectStatus().is2xxSuccessful()
+                .expectBody()
+                .consumeWith(r -> log.info("{}", new String(Objects.requireNonNull(r.getResponseBody()))))
+                .jsonPath("$.length()").isEqualTo(3)
+                .jsonPath("$.id").isEqualTo(1)
+                .jsonPath("$.name").isEqualTo("sam")
+                .jsonPath("$.email").isEqualTo("sam@gmail.com");
+    }
 
 
     @Test
@@ -90,28 +110,22 @@ public class CustomerServiceTest {
                     ;
     }
 
-    /*
-                      page = 3  &  size = 2  returns 2 JSON elements JSON []
-                           [
-                              {"id":5,"name":"sophia","email":"sophia@example.com"},
-                              {"id":6,"name":"liam","email":"liam@example.com"}
-                            ]
-     */
-
-
-
     @Test
-    public void customerById() {
-        this.client.get()
-                   .uri("/customers/1")
-                   .exchange()
-                   .expectStatus().is2xxSuccessful()
-                   .expectBody()
-                   .consumeWith(r -> log.info("{}", new String(Objects.requireNonNull(r.getResponseBody()))))
-                   .jsonPath("$.length()").isEqualTo(3)
-                   .jsonPath("$.id").isEqualTo(1)
-                   .jsonPath("$.name").isEqualTo("sam")
-                   .jsonPath("$.email").isEqualTo("sam@gmail.com");
+    public void createCustomer(){
+        var customerDto = new CustomerDto(null, "oliver", "oliver@gmail.com");
+      Mono<CustomerDto> mono = Mono.just(customerDto);
+      this.client.post()
+              .uri("/customers")
+              // bodyValue takes raw data POJO, while body takes Publisher
+              // .bodyValue(customerDto)
+              .body(mono, CustomerDto.class)
+              .exchange()
+              .expectStatus().is2xxSuccessful()
+              .expectBody()
+              .consumeWith(r -> log.info("{}", new String(Objects.requireNonNull(r.getResponseBody()))))
+              .jsonPath("$.id").isNotEmpty()
+              .jsonPath("$.name").isEqualTo("oliver")
+              .jsonPath("$.email").isEqualTo("oliver@gmail.com");
     }
 
     @Test
