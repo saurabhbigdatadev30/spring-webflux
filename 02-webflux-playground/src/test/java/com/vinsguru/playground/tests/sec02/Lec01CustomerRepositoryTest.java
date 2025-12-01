@@ -75,7 +75,7 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
     public void insertAndDeleteCustomer() {
         // insert new customer
         var customer = new Customer();
-        // customer id is the PK & is auto incremental , so this will be set automatically
+        // customer id is the PK & is auto incremental by the DataBase, so this will be set automatically
         customer.setName("marshal");
         customer.setEmail("marshal@gmail.com");
         this.repository.save(customer)  // returns the inserted Customer i.e Mono<Customer>
@@ -86,6 +86,7 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
                 .expectComplete()
                 .verify();
 
+
         this.repository.deleteById(11)
                 // After deletion , fetch the count of total customers.
                 .then(this.repository.count())
@@ -95,34 +96,56 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
                 .verify();
     }
 
-/*
-What is the difference between the traditional style to mutating the entity and the reactive sytle of mutating in
-the below Java 17 style of  code
-
- var customer = repository.findByName("xxx")
- customer.setName("yyy"));
-
-# Update Operation in non blocking way using doOnNext()
- this.repository.findByName("xxx")
-                .doOnNext(c -> c.setName("YYY"));
-
-Why are using the doOnNext() operator is mainly because it's non-blocking IO. When we invoke findByID() ,we will not know when
-we get the result. The doOnNext() will be executed  when we get the customer, so it will now be mutating the customerName
-without blocking the main thread.
- */
 
 
-    @Test
-    public void updateCustomer() {
-        this.repository.findByName("ethan")
-                .doOnNext(c -> c.setName("noel12"))
-                .flatMap(this.repository::save)
-                .doOnNext(c -> log.info("{}", c))
+    /*@Test
+    public void insertAndDeleteCustomer() {
+        // insert new customer
+           var customer = new Customer();
+           customer.setName("marshal");
+           customer.setEmail("marshal@gmail.com");
+
+        this.repository.save(customer) // returns Mono<Customer>
+                .doOnNext(c -> log.info("Customer inserted -> {}", c))
+                .flatMap(savedCustomer ->
+                        // delete using custom deleteCustomerById and then verify count
+                        this.repository.deleteById(savedCustomer.getId())
+                                .doOnNext(deleted -> Assertions.assertTrue(deleted))
+                                .then(this.repository.count())
+                )
                 .as(StepVerifier::create)
-                .assertNext(c -> Assertions.assertEquals("noel12", c.getName()))
+                .expectNext(10L)
                 .expectComplete()
                 .verify();
-    }
+    }*/
+
+    /*
+    + Need of using FlatMap
+    + Step-by-step Understanding of the updateCustomerUsingMap:
+
+      this.repository.findByName("ethan")
+            - Return type is Flux<Customer>.
+            - So the upstream to map is Flux<Customer>.
+
+	   map signature (simplified):
+       Flux<T>.map(Function<? super T, ? extends R> mapper)
+             - It transforms each element (Customer) emitted by the Flux,
+             - It does not transform the Flux itself.
+             - So the mapper receives Customer, not Flux<Customer>.
+
+	   The mapper:
+         c -> this.repository.save(c)
+             - this.repository.save(c) returns Mono<Customer>.
+             - Therefore map turns Flux<Customer> into Flux<Mono<Customer>>.
+
+
+   To flatten and execute the inner Mono<Customer> publishers, you need flatMap:
+       - flatMap has signature:
+       Flux<T>.flatMap(Function<? super T, ? extends Publisher<? extends R>> mapper)
+       - It takes each Customer, calls save (returning Mono<Customer>), and flattens them into a single Flux<Customer>,
+       subscribing to each inner Mono.
+
+     */
 
     @Test
     public void updateCustomerUsingMap() {
@@ -132,12 +155,32 @@ without blocking the main thread.
                 .as(StepVerifier::create);
     }
 
+    // Using flatMap to update the customer
     @Test
-    public void updateCustomerUsingMap1() {
-        this.repository.findById(1)
+    public void updateCustomer() {
+        this.repository.findByName("ethan")
+                .doOnNext(c -> c.setName("noel12"))
+                // flatMap is required whenever the mapper returns a Mono/Flux.
+                .flatMap(this.repository::save)
+                .doOnNext(c -> log.info("{}", c))
+                .as(StepVerifier::create)
+                .assertNext(c -> Assertions.assertEquals("noel12", c.getName()))
+                .expectComplete()
+                .verify();
+    }
+
+
+
+    @Test
+    public void updateCustomerUsingflatMap() {
+        this.repository.findByName("ethan")
                 .doOnNext(c -> c.setName("noel123"))
-                .map(this.repository::save)
+                .flatMap(this.repository::save) // returns Flux<Customer>
                 .as(StepVerifier::create);
     }
+
+
+
+
 }
 

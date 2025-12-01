@@ -23,11 +23,11 @@ public interface CustomerRepository extends ReactiveCrudRepository<Customer, Int
 
 // Multi-line Query from java 15 onwards
   @Query("""
-            SELECT customer.ID,
-                   customer.NAME,
-                   customer.EMAIL
+            SELECT customer.id,
+                   customer.name,
+                   customer.email
             FROM customer
-            WHERE customer.EMAIL LIKE CONCAT('%', ?1)
+            WHERE customer.email LIKE CONCAT('%', ?1)
          """)
   Flux<Customer> findByEmailEndingWithQuery(String email);
 
