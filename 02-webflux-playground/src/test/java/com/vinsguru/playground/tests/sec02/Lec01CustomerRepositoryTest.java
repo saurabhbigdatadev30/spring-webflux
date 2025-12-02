@@ -169,8 +169,6 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
                 .verify();
     }
 
-
-
     @Test
     public void updateCustomerUsingflatMap() {
         this.repository.findByName("ethan")

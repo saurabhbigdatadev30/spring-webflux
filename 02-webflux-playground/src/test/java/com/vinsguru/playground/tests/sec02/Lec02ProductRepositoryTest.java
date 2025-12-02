@@ -49,15 +49,19 @@ public class Lec02ProductRepositoryTest extends AbstractTest {
     }
 
 
-
     @Test
     public void pageableTest() {
+        // PageRequest implements Pageable interface , findBy method accepts Pageable
         this.repository.findBy(PageRequest.of(2, 4))
                 .doOnNext(p -> log.info("{}", p))
                 .subscribe();
     }
 
     /*
+     When we set PageRequest.of(2,4) , we get id=9 and id=10 only as there are total 10 products
+         Product{id=9, description='apple tv', price=200}
+         Product{id=10, description='homepod', price=300}
+
      a. When we set PageRequest.of(0,4)
         Page = 0
             Executing SQL statement [SELECT PRODUCT.ID, PRODUCT.DESCRIPTION, PRODUCT.PRICE FROM PRODUCT LIMIT 4]
@@ -68,20 +72,22 @@ public class Lec02ProductRepositoryTest extends AbstractTest {
 
        b. When we set PageRequest.of(1,4) , we get  id=5 till id= 8
           Page = 1
-             Executing SQL statement [SELECT PRODUCT.ID, PRODUCT.DESCRIPTION, PRODUCT.PRICE FROM PRODUCT OFFSET 4 ROWS FETCH FIRST 4 ROWS ONLY]
+             Executing SQL statement [SELECT PRODUCT.ID, PRODUCT.DESCRIPTION, PRODUCT.PRICE FROM PRODUCT OFFSET 4 ROWS FETCH
+             FIRST 4 ROWS ONLY]
               Product{id=5, description='apple watch', price=400}
               Product{id=6, description='airpods', price=150}
               Product{id=7, description='airpods pro', price=250}
               Product{id=8, description='beats headphones', price=350}
      */
 
-
-
-
     @Test
     public void pageable() {
+        this.repository.findAll()
+                .doOnNext(p -> log.info(" getAll Products{}", p))
+                .subscribe();
         this.repository.findBy(PageRequest.of(0, 3).withSort(Sort.by("price").ascending()))
                        .doOnNext(p -> log.info("{}", p))
+
                        .as(StepVerifier::create)
                        .assertNext(p -> Assertions.assertEquals(200, p.getPrice()))
                        .assertNext(p -> Assertions.assertEquals(250, p.getPrice()))
@@ -89,8 +95,6 @@ public class Lec02ProductRepositoryTest extends AbstractTest {
                        .expectComplete()
                        .verify();
     }
-
-
 
     @Test
     public void pageableTest1() {
