@@ -5,12 +5,10 @@ import org.springframework.data.annotation.Id;
 import java.time.Instant;
 import java.util.UUID;
 /*
-In Spring Data (R2DBC / JDBC), the @Table annotation is optional
-For CustomerOrder: Class name: CustomerOrder
-Sp the default table name Spring will use: customer_order
-CamelCase -> snake_case
-CustomerOrder -> customer_order
-Since , database table is actually named customer_order, we do not need @Table.
+   In Spring Data (R2DBC / JDBC), the @Table annotation is optional
+   a.Entity class name: CustomerOrder
+   b.Default table name (by Spring Data): customer_order (CamelCase -> snake_case)
+   Actual DB table name: customer_orde
 */
 
 public class CustomerOrder {
