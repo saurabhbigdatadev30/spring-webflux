@@ -31,11 +31,11 @@ public interface CustomerOrderNativeRepository extends ReactiveCrudRepository<Cu
 
     @Query("""
            SELECT
-            c.id as customer_id_Test1_Test2,
+           c.id as customer_id_test1_test2,
             c.email,
             co.order_id,
             co.product_id,
-            c.name AS customer_name_Test1_Test2,
+            c.name AS customer_name_test1_test2,
             co.amount,
             co.order_date
                 FROM

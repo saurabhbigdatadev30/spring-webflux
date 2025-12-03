@@ -14,9 +14,7 @@ public interface ProductRepository extends ReactiveCrudRepository<Product, Integ
 
     Flux<Product> findBy(Pageable pageable);
 
-    // Native Query to find the products between a price range
-    /*@Query("SELECT * FROM product WHERE price BETWEEN :from AND :to")
-    Flux<Product> findByPriceBetweenQuery(int from, int to);*/
+
 
     @Query("""
              SELECT *

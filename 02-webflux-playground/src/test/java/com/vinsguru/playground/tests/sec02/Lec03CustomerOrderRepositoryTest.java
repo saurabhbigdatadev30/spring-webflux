@@ -1,6 +1,7 @@
 package com.vinsguru.playground.tests.sec02;
 
 import com.vinsguru.playground.sec02.repository.CustomerOrderRepository;
+import com.vinsguru.playground.sec03.repository.CustomerOrderNativeRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -14,6 +15,8 @@ public class Lec03CustomerOrderRepositoryTest extends AbstractTest {
 
     @Autowired
     private CustomerOrderRepository repository;
+
+
 
     @Test
     public void productsOrderedByCustomer() {
@@ -35,6 +38,8 @@ public class Lec03CustomerOrderRepositoryTest extends AbstractTest {
                 .expectComplete()
                 .verify();
     }
+
+
 
     // To DO -> Test the order details and customer details for a given product
     @Test

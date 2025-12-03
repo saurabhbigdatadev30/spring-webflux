@@ -8,6 +8,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
 
 @Slf4j
 public class ThroughPutTest {
@@ -62,7 +63,7 @@ public class ThroughPutTest {
               Advantage of using High-Order function here is that we can pass different implementations of Runnable
               to measureTimeTaken() method, without changing its code. So the code is more flexible and reusable.
              */
-            this.measureTimeTaken(i, this::runThroughputTestForR2DBC);
+            this.measureTimeTaken(i, () -> runThroughputTestForR2DBC());
             this.measureTimeTaken(i , () -> runThroughPutTestForJPA(executorService));
         }
     }
@@ -81,12 +82,28 @@ public class ThroughPutTest {
        5. This limits resource usage and context switching overhead compared to creating a new thread per task.
      */
   public void runThroughPutTestForJPA(ExecutorService service){
-        for(int i =0 ; i < TASKS_COUNT ; i++){
+        for(int i =1 ; i < TASKS_COUNT ; i++){
             final var customerID = i;
+           /*
+             Submit a task to the executor service to be run by a worker thread from the pool
+             override the run() method of Runnable interface using lambda expression
+             */
             service.submit(() -> {
                  this.repository.findById(customerID);
              });
         }
+      }
+
+// refactored version of runThroughPutTestForJPA() method using IntStream
+  public void findCustomerJPA(ExecutorService service){
+      IntStream.range(1,TASKS_COUNT)
+              .forEach(customerId ->
+              {
+                  service.submit(() -> {
+                      // implementation of run() method of Runnable interface
+                      this.repository.findById(customerId);
+                  });
+              });
   }
 
 
