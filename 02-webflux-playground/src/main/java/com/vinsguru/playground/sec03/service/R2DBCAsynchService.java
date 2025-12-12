@@ -25,7 +25,7 @@ public class R2DBCAsynchService {
 
         // Start the asynchronous query
         Flux<Customer> customerFlux = customerRepository.findByEmailEndingWithQuery("ke@gmail.com")
-                .delayElements(Duration.ofMillis(9000)) // Simulate processing delay of the DB response in execution of findByEmailEndingWithQuery
+                .delayElements(Duration.ofMillis(9500)) // Simulate processing delay of the DB response in execution of findByEmailEndingWithQuery
                 .doOnSubscribe(subscription ->
                               log.info("[findByEmailEndingWithQuery] Query started on thread: {} " , Thread.currentThread().getName()))
                 .doOnNext(customer -> {
@@ -66,10 +66,6 @@ public class R2DBCAsynchService {
         log.info("THis proves the thread is NOT blocked by the DB operation!!");
     }
 
-    private void methodX() {
-        log.info("methodX() is executing in Thread:   {}", Thread.currentThread().getName());
-        log.info("methodX is complete at = {}" , LocalDateTime.now());
-    }
 
 
     /**

@@ -56,8 +56,6 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
                 .verify();
     }
 // Java.lang.AssertionError: expectation "assertNext" failed (expected: onNext(); actual: onComplete())
-
-
     @Test
     public void findByEmailEndingWith() {
         //this.repository.findByEmailEndingWith("ke@gmail.com")
@@ -76,8 +74,8 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
         // insert new customer
         var customer = new Customer();
         // customer id is the PK & is auto incremental by the DataBase, so this will be set automatically
-        customer.setName("marshal");
-        customer.setEmail("marshal@gmail.com");
+        customer.setName("marshal1");
+        customer.setEmail("marshal1@gmail.com");
         this.repository.save(customer)  // returns the inserted Customer i.e Mono<Customer>
                 .doOnNext(c -> log.info(" Customer inserted is -> {}", c))
                 .as(StepVerifier::create)
@@ -86,9 +84,12 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
                 .expectComplete()
                 .verify();
 
-
         this.repository.deleteById(11)
-                // After deletion , fetch the count of total customers.
+              /*
+               then() is invoked on the Mono returned by this.repository.deleteById(11) (a Mono<Void>).
+               It waits for that completion and then switches to the provided Mono (this.repository.count()
+               returns Mono<Long>).
+               */
                 .then(this.repository.count())
                 .as(StepVerifier::create)
                 .expectNext(10L)
@@ -96,62 +97,54 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
                 .verify();
     }
 
-
-
-    /*@Test
-    public void insertAndDeleteCustomer() {
-        // insert new customer
-           var customer = new Customer();
-           customer.setName("marshal");
-           customer.setEmail("marshal@gmail.com");
-
-        this.repository.save(customer) // returns Mono<Customer>
+// Refactored insertAndDeleteCustomer() as chain the operations rather than having separate StepVerifiers
+    @Test
+    public void insertAndDeleteCustomerUpdatedRefactordUsingMap() {
+        var customer = new Customer();
+        customer.setName("marshal1");
+        customer.setEmail("marshal1@gmail.com");
+        this.repository.save(customer)
                 .doOnNext(c -> log.info("Customer inserted -> {}", c))
-                .flatMap(savedCustomer ->
-                        // delete using custom deleteCustomerById and then verify count
-                        this.repository.deleteById(savedCustomer.getId())
-                                .doOnNext(deleted -> Assertions.assertTrue(deleted))
-                                .then(this.repository.count())
-                )
+                .map(this.repository::delete)
+                .then(this.repository.count())
                 .as(StepVerifier::create)
                 .expectNext(10L)
                 .expectComplete()
                 .verify();
-    }*/
+    }
 
-    /*
-    + Need of using FlatMap
-    + Step-by-step Understanding of the updateCustomerUsingMap:
-
-      this.repository.findByName("ethan")
-            - Return type is Flux<Customer>.
-            - So the upstream to map is Flux<Customer>.
-
-	   map signature (simplified):
-       Flux<T>.map(Function<? super T, ? extends R> mapper)
-             - It transforms each element (Customer) emitted by the Flux,
-             - It does not transform the Flux itself.
-             - So the mapper receives Customer, not Flux<Customer>.
-
-	   The mapper:
-         c -> this.repository.save(c)
-             - this.repository.save(c) returns Mono<Customer>.
-             - Therefore map turns Flux<Customer> into Flux<Mono<Customer>>.
-
-
-   To flatten and execute the inner Mono<Customer> publishers, you need flatMap:
-       - flatMap has signature:
-       Flux<T>.flatMap(Function<? super T, ? extends Publisher<? extends R>> mapper)
-       - It takes each Customer, calls save (returning Mono<Customer>), and flattens them into a single Flux<Customer>,
-       subscribing to each inner Mono.
-
-     */
+    @Test
+    public void insertAndDeleteCustomerUpdatedRefactord() {
+        var customer = new Customer();
+        customer.setName("marshal1");
+        customer.setEmail("marshal1@gmail.com");
+        this.repository.save(customer)
+                .doOnNext(c -> log.info("Customer inserted -> {}", c))
+                .flatMap(this.repository::delete)
+                .then(this.repository.count())
+                .as(StepVerifier::create)
+                .expectNext(10L)
+                .expectComplete()
+                .verify();
+    }
 
     @Test
     public void updateCustomerUsingMap() {
         this.repository.findByName("ethan")
                 .doOnNext(c -> c.setName("noel123"))
                 .map(this.repository::save)
+                .as(StepVerifier::create);
+    }
+
+    /*
+      the flatMap is Flux<T>.flatMap( where T = customer &  R = Customer) . So the output is Flux<Customer>
+     */
+    @Test
+    public void updateCustomerUsingflatMap() {
+        this.repository.findByName("ethan")
+                .doOnNext(c -> c.setName("noel123"))
+              //  .flatMap(c -> this.repository.save(c))
+                .flatMap(this.repository::save) // returns Flux<Customer>
                 .as(StepVerifier::create);
     }
 
@@ -164,18 +157,16 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
                 .flatMap(this.repository::save)
                 .doOnNext(c -> log.info("{}", c))
                 .as(StepVerifier::create)
-                .assertNext(c -> Assertions.assertEquals("noel12", c.getName()))
+                .assertNext(c ->
+                {
+                    Assertions.assertNotNull(c.getId());
+                    Assertions.assertEquals("noel12", c.getName());
+                })
                 .expectComplete()
                 .verify();
     }
 
-    @Test
-    public void updateCustomerUsingflatMap() {
-        this.repository.findByName("ethan")
-                .doOnNext(c -> c.setName("noel123"))
-                .flatMap(this.repository::save) // returns Flux<Customer>
-                .as(StepVerifier::create);
-    }
+
 
 
 

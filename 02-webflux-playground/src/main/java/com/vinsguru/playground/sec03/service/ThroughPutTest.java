@@ -64,7 +64,7 @@ public class ThroughPutTest {
               to measureTimeTaken() method, without changing its code. So the code is more flexible and reusable.
              */
             this.measureTimeTaken(i, () -> runThroughputTestForR2DBC());
-            this.measureTimeTaken(i , () -> runThroughPutTestForJPA(executorService));
+            this.measureTimeTaken(i , () -> runThroughPutTestForJPARefactored(executorService));
         }
     }
 
@@ -81,23 +81,11 @@ public class ThroughPutTest {
        4. The selected call runs on a pooled worker thread, not a newly created thread.
        5. This limits resource usage and context switching overhead compared to creating a new thread per task.
      */
-  public void runThroughPutTestForJPA(ExecutorService service){
-        for(int i =1 ; i < TASKS_COUNT ; i++){
-            final var customerID = i;
-           /*
-             Submit a task to the executor service to be run by a worker thread from the pool
-             override the run() method of Runnable interface using lambda expression
-             */
-            service.submit(() -> {
-                 this.repository.findById(customerID);
-             });
-        }
-      }
 
 // refactored version of runThroughPutTestForJPA() method using IntStream
-  public void findCustomerJPA(ExecutorService service){
+  public void runThroughPutTestForJPARefactored(ExecutorService service){
       IntStream.range(1,TASKS_COUNT)
-              .forEach(customerId ->
+              .forEach( customerId ->
               {
                   service.submit(() -> {
                       // implementation of run() method of Runnable interface
