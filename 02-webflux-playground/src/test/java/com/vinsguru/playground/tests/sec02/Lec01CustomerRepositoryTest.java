@@ -131,6 +131,7 @@ public class Lec01CustomerRepositoryTest extends AbstractTest {
     @Test
     public void updateCustomerUsingMap() {
         this.repository.findByName("ethan")
+                // Flux<Customer>.map(Function<Customer , Mono<Customer>>) // returns = Flux<Mono<Customer>>
                 .doOnNext(c -> c.setName("noel123"))
                 .map(this.repository::save)
                 .as(StepVerifier::create);
