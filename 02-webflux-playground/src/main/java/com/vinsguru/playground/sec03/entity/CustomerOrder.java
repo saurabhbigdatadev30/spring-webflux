@@ -7,7 +7,7 @@ import java.util.UUID;
 /*
 	 Create an Entity class ....   In Spring Data (R2DBC / JDBC), the @Table annotation is optional
            a.Entity class name: CustomerOrder
-           b.Default table name (by Spring Data Statergy is ): customer_order (CamelCase -> snake_case)
+           b.Default table name (by Spring Data Strategy is ): customer_order (CamelCase -> snake_case)
            Actual DB table name: customer_order .
            Conclusion: - Because the default mapping already matches the real table name, the @Table annotation is optional
                           and can be omitted

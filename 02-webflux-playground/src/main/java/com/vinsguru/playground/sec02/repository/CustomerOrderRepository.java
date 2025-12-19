@@ -45,7 +45,7 @@ public interface CustomerOrderRepository extends ReactiveCrudRepository<Customer
                  WHERE
                  c.name = :name
             """)
-    Flux<CustomerOrderRecord> getOrderDetailsJoin(String name);
+    Flux<CustomerOrderRecord> getOrderDetailsByCustomerName(String name);
 
 
     @Query("""

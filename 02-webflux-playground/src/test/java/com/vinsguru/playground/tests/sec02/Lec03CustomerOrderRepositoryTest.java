@@ -28,16 +28,32 @@ public class Lec03CustomerOrderRepositoryTest extends AbstractTest {
                       .verify();
     }
 
+    @Test
+    public void getProductDetailsByCustomerName(){
+        this.repository.getProductsOrderedByCustomer("mike")
+                .doOnNext(c -> log.info("Product details : - {} ", c))
+                .as(StepVerifier::create)
+                .assertNext(p -> Assertions.assertEquals("iphone 20" , p.getDescription()))
+                .assertNext(p -> Assertions.assertEquals("mac pro", p.getDescription()))
+                .expectComplete()
+                .verify();
+
+    }
+
+
+
     // This test is to check the join between Customer and CustomerOrder to fetch Flux of OrderDetails for a given customer
     @Test
     public void getCustomerOrderDetails() {
-          this.repository.getOrderDetailsJoin("sam")
+          this.repository.getOrderDetailsByCustomerName("sam")
                 .doOnNext(p -> log.info("{}", p))
                 .as(StepVerifier::create)
                 .expectNextCount(2)
                 .expectComplete()
                 .verify();
     }
+
+
 
 
 
