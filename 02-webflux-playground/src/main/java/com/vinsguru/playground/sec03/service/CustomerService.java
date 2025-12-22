@@ -19,13 +19,14 @@ public class CustomerService {
 
     public Flux<CustomerDto> getAllCustomers() {
         return this.customerRepository.findAll() // returns Flux<Customer>
-                //.map(c -> EntityDtoMapper.toDto(c));
-                  .map(EntityDtoMapper::toDto);
+                 // .map(c -> EntityDtoMapper.toDto(c));
+                    .map(EntityDtoMapper::toDto);
     }
 
    // Using native query to fetch all customers
     public Flux<CustomerDto> fetchAllCustomers() {
         return this.customerRepository.fectchAllCustomers() // returns Flux<Customer>
+                //.map(c -> EntityDtoMapper.toDto(c))
                 .map(EntityDtoMapper::toDto);
     }
 
@@ -37,13 +38,16 @@ public class CustomerService {
 
     public Mono<CustomerDto> getCustomerById(Integer id) {
         return this.customerRepository.findById(id) // Returns the Mono<Customer>
+                //.map(c -> EntityDtoMapper.toDto(c))
                                       .map(EntityDtoMapper::toDto);
     }
 
 
    public void saveCustomerUsingMap(Mono<CustomerDto> customerDto){
     customerDto.map(EntityDtoMapper::toEntity)
+           // .map(c-> EntityDtoMapper.toEntity(c))
             .map(c -> this.customerRepository.save(c))
+            // .map(c -> this.customerRepository.save(c)) returns Mono<Mono<Customer>> , Mono<Customer>.map(...)
             .subscribe();
    }
 
@@ -55,24 +59,27 @@ public class CustomerService {
                 .map(EntityDtoMapper::toDto);
     }
 
-    public Mono<CustomerDto> updateCustomer(Integer customerID, Mono<CustomerDto> customerDto) {
+    public Mono<CustomerDto> updateCustomer(Integer customerID , Mono<CustomerDto> customerDto){
         return this.customerRepository.findById(customerID)
-                                      .flatMap(entity -> customerDto)
-                                      .map(EntityDtoMapper::toEntity)
-                                      .doOnNext(c -> c.setId(customerID)) // this is safe
-                                      .flatMap(this.customerRepository::save)
-                                      .map(EntityDtoMapper::toDto);
+                .flatMap(customer -> customerDto)
+                .map(EntityDtoMapper::toEntity)
+                .doOnNext(c -> c.setId(customerID))
+                .flatMap(this.customerRepository::save)
+                .map(EntityDtoMapper::toDto);
     }
 
-    /*
-     Usage of map vs flatMap
-       1.  Use map when the mapper returns a simple value i.e not a Publisher e.g converting Entity to Dto or Dto to Entity
-       2.  Use flatMap when the mapper returns a Publisher i.e repository calls like save(...)
-            In this case mapper (entity -> customerDto) returns Mono<CustomerDto> which is a Publisher.
-             Wrapping it with map will yield Mono<Mono<CustomerDto>> which is not desired.
+    /**
+        1. Upstream to the map = Mono<Customer>.map(... )
+        2. Mapper = Function<Customer, Mono<CustomerDto>>
+        3 So, T = Customer, R = Mono<CustomerDto>
+        4. So, the return type of map will be Mono<Mono<CustomerDto>>
+        5. Since the inner Mono<CustomerDto> is not subscribed to, the code inside the inner Mono will never execute.
+        6. Hence, this method will not update the customer record in the database.
+        7. To fix this, we need to use flatMap instead
      */
-    public Disposable updateCustomer1(Integer customerID, Mono<CustomerDto> customerDto) {
-        return this.customerRepository.findById(customerID)
+
+    public void updateCustomerUsingMap(Integer customerID, Mono<CustomerDto> customerDto) {
+         this.customerRepository.findById(customerID)
                 .map(entity -> customerDto)
                 .subscribe();
     }

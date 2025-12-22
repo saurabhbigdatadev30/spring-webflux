@@ -54,13 +54,10 @@ public class Lec03CustomerOrderRepositoryTest extends AbstractTest {
     }
 
 
-
-
-
     // To DO -> Test the order details and customer details for a given product
     @Test
     public void orderDetailsByProduct() {
-        this.repository.getOrderDetailsByProduct("iphone 20")
+        this.repository.getOrderDetailsByProductDescription("iphone 20")
                        .doOnNext(dto -> log.info("Get{}", dto))
                        .as(StepVerifier::create)
                        .assertNext(dto -> Assertions.assertEquals(975, dto.amount()))

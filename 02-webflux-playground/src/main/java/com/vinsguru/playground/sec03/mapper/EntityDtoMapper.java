@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono;
 
 public class EntityDtoMapper {
 
-    // From Dto to Entity
+    // From Dto to Entity coming from the @RequestBody
     public static Customer toEntity(CustomerDto dto){
         var customer = new Customer();
         customer.setName(dto.name());
@@ -15,7 +15,7 @@ public class EntityDtoMapper {
         return customer;
     }
 
-    // From Entity to Dto
+    // From Entity to Dto to be set in the @ResponseBody
     public static CustomerDto toDto(Customer customer){
          return new CustomerDto(
                 customer.getId(),
