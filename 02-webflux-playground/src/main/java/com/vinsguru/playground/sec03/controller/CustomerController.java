@@ -67,11 +67,11 @@ public class CustomerController {
       Instead, we should implement pagination.
      */
     // http://localhost:8081/customers/paginated?page=1&size=3"
-    @GetMapping("paginated")
-    public Flux<CustomerDto> allCustomers(@RequestParam(defaultValue = "1") Integer page,
-                                          @RequestParam(defaultValue = "3") Integer size) {
-        return this.customerService.getAllCustomers(page, size);
-    }
+        @GetMapping("paginated")
+        public Flux<CustomerDto> allCustomers(@RequestParam(defaultValue = "1") Integer page,
+                                              @RequestParam(defaultValue = "3") Integer size) {
+            return this.customerService.getAllCustomers(page, size);
+        }
     // http://localhost:8081/customers/2
     @GetMapping("{id}")
     public Mono<ResponseEntity<CustomerDto>> getCustomer(@PathVariable Integer id) {
@@ -111,7 +111,7 @@ public class CustomerController {
                 // Using filter we check that the this.customerService.deleteCustomerById(id) is true
                 .filter(b -> b)  // If true then proceed to map else returns defaultIfEmpty
                 .map(b -> ResponseEntity.ok().<Void>build())
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .defaultIfEmpty(ResponseEntity.notFound().build()); // If filter returns False
 
 
 

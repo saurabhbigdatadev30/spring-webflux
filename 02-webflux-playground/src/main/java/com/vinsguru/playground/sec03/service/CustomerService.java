@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import reactor.core.Disposable;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 @Slf4j
@@ -86,6 +86,18 @@ public class CustomerService {
 
     public Mono<Boolean> deleteCustomerById(Integer id){
         return this.customerRepository.deleteCustomerById(id);
+    }
+
+    /*
+      1. THis is the default deleteById method provided by R2DBC repository.
+      2 . Since this returns Mono<Void>, we cannot return any status to the caller whether
+           delete was successful or not.
+      3. Since this returns Mono<Void>, so in the controller .defaultIfEmpty(ResponseEntity.notFound().build())
+           will  be executed.
+
+     */
+    public Mono<Void>deleteCustomerByIdDefaultR2DBCImpl(Integer id){
+        return this.customerRepository.deleteById(id);
     }
 
 }

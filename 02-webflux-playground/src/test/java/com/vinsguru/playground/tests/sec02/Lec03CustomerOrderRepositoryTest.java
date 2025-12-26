@@ -37,11 +37,8 @@ public class Lec03CustomerOrderRepositoryTest extends AbstractTest {
                 .assertNext(p -> Assertions.assertEquals("mac pro", p.getDescription()))
                 .expectComplete()
                 .verify();
-
     }
-
-
-
+    
     // This test is to check the join between Customer and CustomerOrder to fetch Flux of OrderDetails for a given customer
     @Test
     public void getCustomerOrderDetails() {

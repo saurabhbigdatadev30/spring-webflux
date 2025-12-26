@@ -35,6 +35,26 @@ public class CustomerServiceTest {
                    .hasSize(10);
     }
 
+   @Test
+   public void allCustomersRefactored() {
+       this.client.get()
+               .uri("/customers/fetchAllCustomersX")
+               .exchange()
+               .expectStatus().is2xxSuccessful()
+               .expectHeader().contentType(MediaType.APPLICATION_JSON)
+               .expectBodyList(CustomerDto.class)
+               .value(list -> {
+                   Assertions.assertNotNull(list);
+                   Assertions.assertFalse(list.isEmpty(), "Expected at least 1 customer");
+                   list.forEach(dto -> {
+                       Assertions.assertNotNull(dto);
+                       Assertions.assertNotNull(dto.id(), "id must not be null");
+                       Assertions.assertNotNull(dto.name(), "name must not be null");
+                       Assertions.assertNotNull(dto.email(), "email must not be null");
+                   });
+               });
+   }
+
     @Test
     public void getCustomerById() {
         this.client.get()
@@ -51,10 +71,11 @@ public class CustomerServiceTest {
                       Assertions.assertEquals("sam@gmail.com", dto.email());
                 });
     }
-/*
-  Instead of mapping the response to CustomerDto.class , we can use JSONPath to verify specific fields in the JSON response.
-  This is useful when we want to verify only certain fields and not map the entire response to a POJO.
-  This approach is also helpful when the response structure is complex or when we want to avoid creating multiple POJO classes
+/**
+   1. Instead of mapping the response to CustomerDto.class i.e [expectBody(CustomerDto.class)]  we can use JSONPath to
+       verify specific fields in JSON response.
+   2.  This is useful when we want to verify only certain fields and not map the entire response to a POJO
+   3.  JSONPath expressions allow us to navigate and extract specific parts of a JSON document easily.
 
  */
 
@@ -93,7 +114,23 @@ public class CustomerServiceTest {
 
 
     @Test
-    public void paginatedCustomers() {
+    public void paginatedCustomerWithPojo(){
+        this.client.get()
+                .uri("/customers/paginated?page=2&size=3")
+                .exchange()
+                .expectStatus().is2xxSuccessful()
+                .expectBodyList(CustomerDto.class)
+                .value(customerLst -> {
+                      customerLst.forEach(customerDto -> {
+                          Assertions.assertNotNull(customerDto);
+                          log.info("Customer details == {}", customerDto);
+                      });
+                });
+    }
+
+
+    @Test
+    public void paginatedCustomersRefactoredWithJson() {
         this.client.get()
                    .uri("/customers/paginated?page=3&size=2")
                    .exchange()
