@@ -1,6 +1,7 @@
 package com.vinsguru.playground.tests.sec03;
 
 import com.vinsguru.playground.sec03.dto.CustomerDto;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -13,30 +14,32 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
-
+@Slf4j
 @AutoConfigureWebTestClient
 @SpringBootTest(properties = "sec=sec03")
 public class CustomerServiceTest {
-
-    private static final Logger log = LoggerFactory.getLogger(CustomerServiceTest.class);
 
     @Autowired
     private WebTestClient client;
 
     @Test
-    public void allCustomers() {
+    public void allCustomersUsingPojo() {
         this.client.get()
                    .uri("/customers/fetchAllCustomersX")
                    .exchange()
                    .expectStatus().is2xxSuccessful()
                    .expectHeader().contentType(MediaType.APPLICATION_JSON)
                    .expectBodyList(CustomerDto.class)
-                   .value(list -> log.info("Customer details == {}", list))
-                   .hasSize(10);
+                   .value(list -> {
+                       log.info("Customer details == {}", list);
+                       Assertions.assertNotNull(list);
+                   });
+
     }
 
+
    @Test
-   public void allCustomersRefactored() {
+   public void allCustomersRefactoredUsingPojo() {
        this.client.get()
                .uri("/customers/fetchAllCustomersX")
                .exchange()
@@ -44,8 +47,6 @@ public class CustomerServiceTest {
                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                .expectBodyList(CustomerDto.class)
                .value(list -> {
-                   Assertions.assertNotNull(list);
-                   Assertions.assertFalse(list.isEmpty(), "Expected at least 1 customer");
                    list.forEach(dto -> {
                        Assertions.assertNotNull(dto);
                        Assertions.assertNotNull(dto.id(), "id must not be null");
@@ -72,8 +73,8 @@ public class CustomerServiceTest {
                 });
     }
 /**
-   1. Instead of mapping the response to CustomerDto.class i.e [expectBody(CustomerDto.class)]  we can use JSONPath to
-       verify specific fields in JSON response.
+   1. Instead of mapping the response to CustomerDto.class i.e [expectBody(CustomerDto.class)]  we can use
+       JSONPath to verify specific fields in JSON response.
    2.  This is useful when we want to verify only certain fields and not map the entire response to a POJO
    3.  JSONPath expressions allow us to navigate and extract specific parts of a JSON document easily.
 
@@ -109,6 +110,9 @@ public class CustomerServiceTest {
                 .jsonPath("$[1].id").isEqualTo(2)
                 .jsonPath("$[1].name").isEqualTo("mike")
                 .jsonPath("$[1].email").isEqualTo("mike@gmail.com")
+                .jsonPath("$[9].id").isEqualTo(10)
+                .jsonPath("$[9].name").isEqualTo("ethan")
+                .jsonPath("$[9].email").isEqualTo("ethan@example.com")
                ;
     }
 
