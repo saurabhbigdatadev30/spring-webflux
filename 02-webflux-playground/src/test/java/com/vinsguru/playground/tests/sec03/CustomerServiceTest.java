@@ -37,7 +37,6 @@ public class CustomerServiceTest {
 
     }
 
-
    @Test
    public void allCustomersRefactoredUsingPojo() {
        this.client.get()
@@ -74,9 +73,11 @@ public class CustomerServiceTest {
     }
 /**
    1. Instead of mapping the response to CustomerDto.class i.e [expectBody(CustomerDto.class)]  we can use
-       JSONPath to verify specific fields in JSON response.
-   2.  This is useful when we want to verify only certain fields and not map the entire response to a POJO
-   3.  JSONPath expressions allow us to navigate and extract specific parts of a JSON document easily.
+       JSONPath to verify specific fields in JSON response
+   2. Using JSONPath we are not deserializing the response into a Java object, instead we are directly
+       accessing the JSON structure to validate specific fields.
+   3. This can be more efficient in scenarios where we only need to check a few fields in the response without
+       the overhead of full deserialization.
 
  */
 
@@ -96,7 +97,7 @@ public class CustomerServiceTest {
 
 
     @Test
-    public void fetchAllCustomers() {
+    public void fetchAllCustomerssingJsonPath() {
         this.client.get()
                 .uri("/customers/fetchAllCustomersX")
                 .exchange()
@@ -217,8 +218,22 @@ public class CustomerServiceTest {
     }
 
     @Test
-    public void updateCustomer() {
-        var dto = new CustomerDto(null, "noel", "noelXXX@gmail.com");
+    public void updateCustomerWithPojoStyle(){
+        var customerDto = new CustomerDto(null, "noelX", "abc@gmail.com");
+        this.client.put()
+                .uri("/customers/10")
+                .bodyValue(customerDto)
+                .exchange()
+                .expectBody(CustomerDto.class)
+                .value(dto -> {
+                    Assertions.assertNotNull(dto);
+                    Assertions.assertEquals("abc@gmail.com" , dto.email());
+                });
+     }
+
+    @Test
+    public void updateCustomerWithJson() {
+        var dto = new CustomerDto(null, "noelXX", "noelXXX@gmail.com");
         this.client.put()
                    .uri("/customers/10")
                    .bodyValue(dto)
@@ -227,22 +242,22 @@ public class CustomerServiceTest {
                    .expectBody()
                    .consumeWith(r -> log.info("{}", new String(Objects.requireNonNull(r.getResponseBody()))))
                    .jsonPath("$.id").isEqualTo(10)
-                   .jsonPath("$.name").isEqualTo("noel")
+                   .jsonPath("$.name").isEqualTo("noelXX")
                    .jsonPath("$.email").isEqualTo("noelXXX@gmail.com");
     }
 
-   /* @Test
+    @Test
     public void customerNotFound() {
         // get
         this.client.get()
-                   .uri("/customers/11")
+                   .uri("/customers/15")
                    .exchange()
                    .expectStatus().is4xxClientError()
                    .expectBody().isEmpty();
 
         // delete
         this.client.delete()
-                   .uri("/customers/11")
+                   .uri("/customers/15")
                    .exchange()
                    .expectStatus().is4xxClientError()
                    .expectBody().isEmpty();
@@ -250,11 +265,11 @@ public class CustomerServiceTest {
         // put
         var dto = new CustomerDto(null, "noel", "noel@gmail.com");
         this.client.put()
-                   .uri("/customers/11")
+                   .uri("/customers/15")
                    .bodyValue(dto)
                    .exchange()
                    .expectStatus().is4xxClientError()
                    .expectBody().isEmpty();
-    }*/
+    }
 
 }

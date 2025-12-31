@@ -30,9 +30,14 @@ public class CustomerService {
                                       .map(EntityDtoMapper::toDto);
     }
 
+    /*
+     1. mono.map(..) -> Mono<Customer> . This is the input to the flatMap
+     2. flatMap(customerRepository::save) -> Mono<Customer>.flatMap(customer, Function<Customer, Mono<Customer>>)
+     */
     public Mono<CustomerDto> saveCustomer(Mono<CustomerDto> mono) {
-        return mono.map(EntityDtoMapper::toEntity)
-                   .flatMap(this.customerRepository::save)
+        return mono.map(EntityDtoMapper::toEntity) // returns Mono<Customer>
+                  // .flatMap(entity -> this.customerRepository.save(entity))
+                   .flatMap(this.customerRepository::save) //replace lambda with method reference
                    .map(EntityDtoMapper::toDto);
     }
 

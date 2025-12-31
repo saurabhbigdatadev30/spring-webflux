@@ -5,7 +5,7 @@ public class CustomerNotFoundException extends RuntimeException {
     private static final String MESSAGE = "Customer with [customerId=%d] is not found";
 
     public CustomerNotFoundException(Integer customerId) {
-           super(MESSAGE.formatted(customerId));
+           super("Customer with [customerId=%d] is not found".formatted(customerId));
     }
 
 

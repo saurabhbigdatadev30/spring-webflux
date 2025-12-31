@@ -2,17 +2,10 @@ package com.vinsguru.playground.sec04.exceptions;
 
 public class InvalidInputExceptionRefactored extends RuntimeException
 {
-    private static final String MESSAGE = "Invalid input: %s";
+    private static final String MESSAGE = "input [field=%s] is not valid";
 
-    public InvalidInputExceptionRefactored(String message, String field) {
-        super(message + ": " + field);
-       //  To DO super(message.formatted(field));
+    public InvalidInputExceptionRefactored(String fieldName) {
+        super("input [fieldName=%s] is not valid".formatted(fieldName));
     }
-
-    // For cases where the field is null.
-    public InvalidInputExceptionRefactored(String message) {
-        super(message);
-    }
-
-
 }
+

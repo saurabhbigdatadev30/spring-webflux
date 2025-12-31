@@ -1,8 +1,9 @@
 package com.vinsguru.playground.sec04.exceptions;
 
+import com.vinsguru.playground.sec04.dto.CustomerDto;
 import reactor.core.publisher.Mono;
 
- // This is an Exception Factory class that will throw all the Custom Runtime Exceptions
+ // Exception Factory class that will throw Custom Runtime Exceptions , when the validation fails in RequestValidator
 public class ApplicationExceptions {
 
     public static <T> Mono<T> customerNotFound(Integer customerId){
@@ -13,20 +14,23 @@ public class ApplicationExceptions {
         return Mono.error(new InvalidInputException("Name is required"));
     }
 
+     public static Mono<CustomerDto> invalidNameFormat() {
+         return Mono.error(new InvalidInputException("Name must contain only alphabets and spaces"));
+     }
+
      public static <T> Mono<T> missingEmail(){
-         return Mono.error(new InvalidInputException("email cannot be null "));
+         return Mono.error(new InvalidInputException("email is required "));
      }
      public static <T> Mono<T> invalidEmailFormat(){
          return Mono.error(new InvalidInputException("Invalid email format"));
      }
 
-// Added for refactored InvalidInputException
-     public static <T> Mono<T> restrictedCharacters(String input){
-         return Mono.error(new InvalidInputExceptionRefactored("Restricted characters in input" ,input));
+     // Genric method to handle any of the invalid input field name
+     public static <T> Mono<T> invalidInputFieldName(String fieldName){
+         return Mono.error(new InvalidInputExceptionRefactored(fieldName));
      }
 
 
-
-}
+ }
 
 

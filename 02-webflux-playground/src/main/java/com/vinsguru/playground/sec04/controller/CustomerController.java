@@ -4,13 +4,14 @@ import com.vinsguru.playground.sec04.dto.CustomerDto;
 import com.vinsguru.playground.sec04.exceptions.ApplicationExceptions;
 import com.vinsguru.playground.sec04.service.CustomerService;
 import com.vinsguru.playground.sec04.validator.RequestValidator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-
+@Slf4j
 @RestController
 @RequestMapping("customers")
 public class CustomerController {
@@ -37,13 +38,17 @@ public class CustomerController {
     }
 
     /*
-     @RequestBody Mono<CustomerDto> mono is the Publisher , which needs to be validated before persisting to the DataBase
+     @RequestBody Mono<CustomerDto> mono is the Publisher , which needs to be validated before persisting
+     to the DataBase
      */
     @PostMapping
     public Mono<CustomerDto> saveCustomer(@RequestBody Mono<CustomerDto> customermono) {
-        return customermono.transform(RequestValidator.validate())
-                   .as(this.customerService::saveCustomer);
+        return customermono.transform(RequestValidator.validate()) // returns Mono<CustomerDto> validated dto
+                .doOnNext(customerDto -> log.info("validated CustomerDto: {}", customerDto))
+                .as(this.customerService::saveCustomer);
     }
+
+
 
     @PutMapping("{id}")
     public Mono<CustomerDto> updateCustomer(@PathVariable Integer id, @RequestBody Mono<CustomerDto> mono) {
