@@ -41,6 +41,19 @@ public class CustomerService {
                    .map(EntityDtoMapper::toDto);
     }
 
+    /*
+
+        1. findById(..) returns Mono<CustomerEntity>
+        2. Mono<CustomerEntity>.map(Function<CustomerEntity, Mono<CustomerDto>>)
+        3. So, the result is Mono<Mono<CustomerDto>>
+        4. This is an issue , because the inner mono is never subscribed to.
+     */
+    public void updateCustomerUsingMapIssue(Integer customerId , Mono<CustomerDto> mono) {
+        this.customerRepository.findById(customerId)
+                .map(entity -> mono)
+                .subscribe();
+    }
+
     public Mono<CustomerDto> updateCustomer(Integer id, Mono<CustomerDto> mono) {
         return this.customerRepository.findById(id)
                                       .flatMap(entity -> mono)

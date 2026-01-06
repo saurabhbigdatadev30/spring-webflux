@@ -26,24 +26,32 @@ public class RequestValidator {
     private static final Predicate<String> NAME_ALLOWED_CHARS =
             (name) -> {
                            log.info("name check for allowed characters, name={}", name);
-                           return name != null && name.matches("[\\p{L} .'-]+");
+                            return name != null && name.matches("^[a-zA-Z]+$");
             };
 
+    /*
+       validate() is a Higher Order Function that
+       It returns a Function<T,R> that takes a T = Mono<CustomerDto> and R =  Mono<CustomerDto>.
+     */
     public static UnaryOperator<Mono<CustomerDto>> validate() {
         return customerDto ->
         {
            return  customerDto
                    .doOnNext(dto -> log.info("Validate the incoming request dto: = {}", dto))
-                   .filter(dto->hasName().test(dto))
-                   .filter(hasName())
+                // .filter(dto->hasName().test(dto)) // Lambda expression
+                   .filter(hasName())  // Method reference to custom validation for the above lambda
                    .switchIfEmpty(ApplicationExceptions.missingName())
-                   .filter(hasNameWithoutSpecialChars())
+               //  .filter(dto -> isNameValid().test(dto))
+                   .filter(isNameValid())
                    .switchIfEmpty(ApplicationExceptions.invalidNameFormat())
+              //   .filter(dto -> hasEmail().test(dto))
                    .filter(hasEmail())
                    .switchIfEmpty(ApplicationExceptions.missingEmail())
+                   .filter(dto -> isEmailValidByLambda().test(dto))
+                   .filter(dto -> isEmailValid().test(dto))
                    .filter(isEmailValid())
-                    .switchIfEmpty(ApplicationExceptions.invalidEmailFormat());
-                        };
+                   .switchIfEmpty(ApplicationExceptions.invalidEmailFormat());
+        };
     }
 
  // Define custom validation using Predicates ------------------------
@@ -54,7 +62,7 @@ public class RequestValidator {
         };
     }
 
-    private static Predicate<CustomerDto> hasNameWithoutSpecialChars() {
+    private static Predicate<CustomerDto> isNameValid() {
         return dto -> {
             String name = dto == null ? null : dto.name();
             log.info("Validating name does not contain special characters, name={}", name);
@@ -70,12 +78,14 @@ public class RequestValidator {
         };
     }
 
-    public static Predicate<CustomerDto> isEmailValidByLambda() {
-        return dto -> {
-            return isHostNameValid(dto);
+    // Using lambda expression , we validate the email host name
+   private static Predicate<CustomerDto> isEmailValidByLambda(){
+        return customerDto -> {
+            return isHostNameValid(customerDto);
         };
-    }
+   }
 
+   // The above lambda expression can be replaced by method reference & validate the email host name
     public static Predicate<CustomerDto>isEmailValid(){
         return RequestValidator::isHostNameValid;
     }

@@ -43,6 +43,16 @@ public class CustomerService {
     }
 
 
+    /*
+      Understanding why using map here is incorrect
+        1. Upstream to the map = Mono<CustomerDto>.map(...)
+        2. Mapper = Function<Customer, Mono<Customer>>
+        3 So, T = CustomerDto, R = Mono<Mono<Customer>>
+        4. So, the return type of map will be Mono<Mono<Customer>>
+        5. Since the inner Mono<Customer> is not subscribed to, the code inside the inner Mono will never execute.
+            To fix this, we need to use flatMap instead. The flatMap will subscribe to the inner Mono<Customer>
+
+     */
    public void saveCustomerUsingMap(Mono<CustomerDto> customerDto){
     customerDto.map(EntityDtoMapper::toEntity)
            // .map(c-> EntityDtoMapper.toEntity(c))

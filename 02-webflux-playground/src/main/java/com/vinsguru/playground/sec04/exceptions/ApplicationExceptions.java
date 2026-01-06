@@ -3,7 +3,10 @@ package com.vinsguru.playground.sec04.exceptions;
 import com.vinsguru.playground.sec04.dto.CustomerDto;
 import reactor.core.publisher.Mono;
 
- // Exception Factory class that will throw Custom Runtime Exceptions , when the validation fails in RequestValidator
+ /*
+   Exception Factory class that will throw Custom Runtime Exceptions , when the validation fails
+   in RequestValidator
+  */
 public class ApplicationExceptions {
 
     public static <T> Mono<T> customerNotFound(Integer customerId){

@@ -25,10 +25,6 @@ public class CustomerController {
         this.customerService = customerService;
         this.asynchDemo = asynchDemo;
     }
-    @GetMapping
-    public Flux<CustomerDto> allCustomers() {
-        return this.customerService.getAllCustomers();
-    }
 
     @GetMapping("/fetchAllCustomersX")
     public Flux<CustomerDto> fetchAllCustomers() {
@@ -81,12 +77,6 @@ public class CustomerController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public Mono<CustomerDto> saveCustomer(@RequestBody Mono<CustomerDto> mono) {
-        return this.customerService.saveCustomer(mono);
-        // To return response entity with status code
-    }
-
     @PostMapping("persistCustomer")
     public Mono<ResponseEntity<CustomerDto>> saveCustomerUpdated(@RequestBody Mono<CustomerDto> mono)
     {
@@ -96,9 +86,9 @@ public class CustomerController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-
     @PutMapping("{id}")
-    public Mono<ResponseEntity<CustomerDto>> updateCustomer(@PathVariable Integer id, @RequestBody Mono<CustomerDto> mono) {
+    public Mono<ResponseEntity<CustomerDto>> updateCustomer(@PathVariable Integer id, @RequestBody Mono<CustomerDto> mono)
+    {
         return this.customerService.updateCustomer(id, mono)
                 //.map(dto -> ResponseEntity.ok(dto))
                 .map(ResponseEntity::ok)
@@ -112,8 +102,6 @@ public class CustomerController {
                 .filter(b -> b)  // If true then proceed to map else returns defaultIfEmpty
                 .map(b -> ResponseEntity.ok().<Void>build())
                 .defaultIfEmpty(ResponseEntity.notFound().build()); // If filter returns False
-
-
 
     }
 
