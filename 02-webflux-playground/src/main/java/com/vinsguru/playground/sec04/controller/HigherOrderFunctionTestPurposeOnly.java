@@ -11,8 +11,15 @@ public class HigherOrderFunctionTestPurposeOnly {
 
     private static final Set<String> BLOCKED_HOST_NAMES = Set.of("gmail.com", "yahoo.com" , "hotmail.com");
 
+    /**
+     1. hasAtSymbol is a Higher Order function , since it returns a lambda implementation of Functional Interface Predicate .
+     2. This Lambda expression accepts a String(email) as input and returns a boolean indicating whether the email
+         contains an "@" symbol.
+     3. So, the argument belongs to the Lamda expression , not the hasAtSymbol() method itself.
+     4. This lambda expression is exeuted when the returned Predicate's test() method is invoked.
+         hasSymbol().test("abc@gmail.com");
+     */
     public static Predicate<String> hasAtSymbol() {
-        // The method returns a Lambda Expression that implements the Predicate functional interface
         return email -> {
             log.info("Checking for @ symbol in email: {}", email);
             return email != null && email.contains("@");

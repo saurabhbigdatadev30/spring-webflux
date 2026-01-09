@@ -33,28 +33,38 @@ public class RequestValidator {
        validate() is a Higher Order Function that
        It returns a Function<T,R> that takes a T = Mono<CustomerDto> and R =  Mono<CustomerDto>.
      */
+
     public static UnaryOperator<Mono<CustomerDto>> validate() {
         return customerDto ->
         {
            return  customerDto
                    .doOnNext(dto -> log.info("Validate the incoming request dto: = {}", dto))
-                // .filter(dto->hasName().test(dto)) // Lambda expression
                    .filter(hasName())  // Method reference to custom validation for the above lambda
                    .switchIfEmpty(ApplicationExceptions.missingName())
-               //  .filter(dto -> isNameValid().test(dto))
                    .filter(isNameValid())
                    .switchIfEmpty(ApplicationExceptions.invalidNameFormat())
-              //   .filter(dto -> hasEmail().test(dto))
                    .filter(hasEmail())
                    .switchIfEmpty(ApplicationExceptions.missingEmail())
-                   .filter(dto -> isEmailValidByLambda().test(dto))
-                   .filter(dto -> isEmailValid().test(dto))
-                   .filter(isEmailValid())
+                   .filter(isEmailValidByLambda())
                    .switchIfEmpty(ApplicationExceptions.invalidEmailFormat());
         };
     }
 
- // Define custom validation using Predicates ------------------------
+    public static UnaryOperator<Mono<CustomerDto>> validateUnderstandingUnderTheHood(){
+        return customerDto -> {
+            return customerDto
+                    .doOnNext(dto -> log.info("Validate the incoming request dto: = {}", dto))
+                    .filter(dto -> hasName().test(dto))
+                    .switchIfEmpty(ApplicationExceptions.missingName())
+                    .filter(dto -> isNameValid().test(dto))
+                    .switchIfEmpty(ApplicationExceptions.invalidNameFormat())
+                    .filter(dto -> hasEmail().test(dto))
+                    .switchIfEmpty(ApplicationExceptions.missingEmail())
+                    .filter(dto -> isEmailValidByLambda().test(dto))
+                    .switchIfEmpty(ApplicationExceptions.invalidEmailFormat());
+        };
+    }
+
     private static Predicate<CustomerDto> hasName() {
         return dto -> {
             log.info("Validating if name is not null dto: {}", dto);

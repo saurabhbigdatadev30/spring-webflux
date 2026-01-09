@@ -38,8 +38,8 @@ public class CustomerService {
 
     public Mono<CustomerDto> getCustomerById(Integer id) {
         return this.customerRepository.findById(id) // Returns the Mono<Customer>
-                //.map(c -> EntityDtoMapper.toDto(c))
-                                      .map(EntityDtoMapper::toDto);
+                //.map(c -> EntityDtoMapper.toDto(c))  using lambda
+                 .map(EntityDtoMapper::toDto);   // The above line can be replaced with method reference
     }
 
 
@@ -72,20 +72,22 @@ public class CustomerService {
     public Mono<CustomerDto> updateCustomer(Integer customerID , Mono<CustomerDto> customerDto){
         return this.customerRepository.findById(customerID)
                 .flatMap(customer -> customerDto)
-                .map(EntityDtoMapper::toEntity)
+               // .map(dto -> EntityDtoMapper.toEntity(dto))
+                  .map(EntityDtoMapper::toEntity)
                 .doOnNext(c -> c.setId(customerID))
                 .flatMap(this.customerRepository::save)
                 .map(EntityDtoMapper::toDto);
     }
 
+
     /**
-        1. Upstream to the map = Mono<Customer>.map(... )
-        2. Mapper = Function<Customer, Mono<CustomerDto>>
-        3 So, T = Customer, R = Mono<CustomerDto>
-        4. So, the return type of map will be Mono<Mono<CustomerDto>>
-        5. Since the inner Mono<CustomerDto> is not subscribed to, the code inside the inner Mono will never execute.
-        6. Hence, this method will not update the customer record in the database.
-        7. To fix this, we need to use flatMap instead
+    1. this.customerRepository.findById(customerID) returns Mono<Customer>. So, Upstream to the map = Mono<Customer>.map(.....)
+    2. Mapper = Function<Customer, Mono<CustomerDto>>
+    3  So, T = Customer, R = Mono<CustomerDto>
+    4. So, the return type of map = Mono<Mono<CustomerDto>>
+    5. Since the inner Mono<CustomerDto> is not subscribed to, the code inside the inner Mono will never execute.
+    6. Hence, this method will not update the customer record in the database.
+    7. To fix this, we need to use flatMap instead
      */
 
     public void updateCustomerUsingMap(Integer customerID, Mono<CustomerDto> customerDto) {
