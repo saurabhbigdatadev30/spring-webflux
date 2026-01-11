@@ -16,7 +16,7 @@ public class HigherOrderFunctionTestPurposeOnly {
      2. This Lambda expression accepts a String(email) as input and returns a boolean indicating whether the email
          contains an "@" symbol.
      3. So, the argument belongs to the Lamda expression , not the hasAtSymbol() method itself.
-     4. This lambda expression is exeuted when the returned Predicate's test() method is invoked.
+     4. This lambda expression is executed when the returned Predicate's test() method is invoked.
          hasSymbol().test("abc@gmail.com");
      */
     public static Predicate<String> hasAtSymbol() {
@@ -26,7 +26,7 @@ public class HigherOrderFunctionTestPurposeOnly {
         };
     }
 
-    // Higher Order Function
+    // Higher Order Function as above , returns Predicate lambda to check valid host name
     public static Predicate<String> hasValidHostName(Set<String> blockedHostNames) {
         return email -> {
             log.info("Checking valid domain name = : {} in email", email);
@@ -37,7 +37,8 @@ public class HigherOrderFunctionTestPurposeOnly {
             return !blockedHostNames.contains(domain);
         };
     }
-   // Predicate Composition - Higher Order Predicate , we join Predicates together with and .
+
+    // Composition (combining of predicates) to validate the email is a corporate mail
     public static Predicate<String> isCorporateEmailValid() {
         return hasAtSymbol().and(hasValidHostName(BLOCKED_HOST_NAMES));
     }

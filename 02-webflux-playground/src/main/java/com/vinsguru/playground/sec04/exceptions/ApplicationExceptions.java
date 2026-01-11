@@ -28,7 +28,7 @@ public class ApplicationExceptions {
          return Mono.error(new InvalidInputException("Invalid email format"));
      }
 
-     // Genric method to handle any of the invalid input field name
+     // Generic method to handle any of the invalid input field name , providing the field name as parameter
      public static <T> Mono<T> invalidInputFieldName(String fieldName){
          return Mono.error(new InvalidInputExceptionRefactored(fieldName));
      }

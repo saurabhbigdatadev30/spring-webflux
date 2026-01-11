@@ -37,15 +37,19 @@ public class CustomerController {
                                    .switchIfEmpty(ApplicationExceptions.customerNotFound(id));
     }
 
-    /*
-     @RequestBody Mono<CustomerDto> mono is the Publisher , which needs to be validated before persisting
-     to the DataBase
-     */
+/*
+    1.Validate Publisher obj @RequestBody<Mono<CustomerDto>> customermono, before passing it to the service layer.
+    2.mono.transform(..) takes Function where T = Mono<CustomerDto> and R = Mono<CustomerDto> (after validation).
+    3.RequestValidator.validate() returns Function<Mono<CustomerDto>, Mono<CustomerDto>>
+    4.Invocation of the validate() method will be validate().apply(customerDto)
+ */
     @PostMapping
     public Mono<CustomerDto> saveCustomer(@RequestBody Mono<CustomerDto> customermono) {
-        return customermono.transform(RequestValidator.validate()) // returns Mono<CustomerDto> validated dto
+        return customermono.transform(customerdto -> RequestValidator.validate().apply(customerdto))
+    //    return customermono.transform(RequestValidator.validate())
                 .doOnNext(customerDto -> log.info("validated CustomerDto: {}", customerDto))
-                .as(this.customerService::saveCustomer);
+              //   .flatMap(this.customerService::saveCustomer);
+                   .as(this.customerService::saveCustomer);
     }
 
 
